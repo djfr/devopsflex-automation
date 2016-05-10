@@ -1,0 +1,56 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>6CAFC0C6-A428-4d30-A9F9-700E829FEA51</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>MyApplication</RootNamespace>
+    <AssemblyName>MyApplication</AssemblyName>
+    <Name>DevOpsFlex.Environments.PowerShell</Name>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DevOpsFlex.Environments.Models\DevOpsFlex.Environments.Models.csproj">
+      <Name>DevOpsFlex.Environments.Models</Name>
+      <Project>{c4a073e7-b507-4906-80cb-e48efe4b355e}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AzureADHelpers.psm1" />
+    <Compile Include="AzurePrincipalWithSecret.psm1" />
+    <Compile Include="AzurePrincipalWithCert.psm1" />
+    <Compile Include="Debug\ReloadModule.ps1" />
+    <Compile Include="Debug\AzurePrincipalWithSecret.ps1" />
+    <Compile Include="Debug\AzurePrincipalWithCert.ps1" />
+    <Compile Include="DevOpsFlex.Automation.PowerShell.psd1" />
+    <Compile Include="DevOpsFlex.Automation.PowerShell.psm1" />
+    <Compile Include="DevOpsFlex.Automation.PowerShell.tests.ps1" />
+    <Compile Include="ResizeASMDisk.psm1" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Debug\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="DevOpsFlex.Automation.PowerShell-Help.xml" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <Target Name="Build" />
+</Project>
