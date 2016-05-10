@@ -1,7 +1,11 @@
-devopsflex-environments
+devopsflex-automation
 =======================
 
 PowerShell module to automate certain tasks that are used to complement ARM templates and other development support automation against Windows Azure.
+
+Push to PSGallery build:
+
+![](https://djfr.visualstudio.com/_apis/public/build/definitions/08587db2-4c39-4e7b-8bd1-caef22e0cd47/3/badge)
 
 ## Functions in this module
 
