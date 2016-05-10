@@ -146,8 +146,8 @@ function New-AzurePrincipalWithCert
     }
 
     # Upload the cert and cert passwords to the right keyvaults
-    $void = Set-KeyVaultCertSecret -CertFolderPath $certPath -CertPassword $CertPassword -VaultName $systemVaultName -SecretName "$principalIdDashed-Cert"
-    $void = Set-AzureKeyVaultSecret -VaultName "$systemVaultName-cp" -Name $principalIdDashed -SecretValue (ConvertTo-SecureString -String $CertPassword -AsPlainText –Force)
+    $void = Set-KeyVaultCertSecret -VaultName $systemVaultName -CertFolderPath $certPath -CertPassword $CertPassword -SecretName "$principalIdDashed-Cert"
+    $void = Set-AzureKeyVaultSecret -VaultName $systemVaultName -Name "$principalIdDashed-CertPwd" -SecretValue (ConvertTo-SecureString -String $CertPassword -AsPlainText –Force)
 
     # Populate the system keyvault with all relevant principal configuration information
     $void = Set-AzureKeyVaultSecret -VaultName $systemVaultName -Name "$principalIdDashed-TenantId" -SecretValue (ConvertTo-SecureString -String $tenantId -AsPlainText –Force)
@@ -232,23 +232,21 @@ function Remove-AzurePrincipalWithCert
 
     $systemVaultName = "$($systemName.ToLower())-$($environmentName.ToLower())"
 
-    # 1. Remove the cert from the system keyvault
+    # Remove the cert and cert password from the system keyvault
     Remove-AzureKeyVaultSecret -VaultName $systemVaultName -Name "$dashName-Cert" -Force -Confirm:$false
+    Remove-AzureKeyVaultSecret -VaultName $systemVaultName -Name "$dashName-CertPwd" -Force -Confirm:$false
 
-    # 2. Remove the principal configuration information from the system keyvault
+    # Remove the principal configuration information from the system keyvault
     Remove-AzureKeyVaultSecret -VaultName $systemVaultName -Name "$dashName-TenantId" -Force -Confirm:$false
     Remove-AzureKeyVaultSecret -VaultName $systemVaultName -Name "$dashName-IdentifierUri" -Force -Confirm:$false
     Remove-AzureKeyVaultSecret -VaultName $systemVaultName -Name "$dashName-ApplicationId" -Force -Confirm:$false
-
-    # 3. Remove the cert password from the certs keyvault
-    Remove-AzureKeyVaultSecret -VaultName "$systemVaultName-cp" -Name $dashName -Force -Confirm:$false
 
     # Swap back to the subscription the user was in
     if(($VaultSubscriptionId -ne $null) -and ($currentSubId -ne $VaultSubscriptionId)) {
         Select-AzureRmSubscription -SubscriptionId $currentSubId | Out-Null
     }
 
-    # 4. Remove the AD Service Principal
+    # Remove the AD Service Principal
     $servicePrincipal = Get-AzureRmADServicePrincipal -SearchString $dotName -ErrorAction SilentlyContinue
     if($servicePrincipal) {
         Remove-AzureRmADServicePrincipal -ObjectId $servicePrincipal.Id -Force
@@ -257,7 +255,7 @@ function Remove-AzurePrincipalWithCert
         Write-Warning "Couldn't find any Service Principal using the search string [$dotName]"
     }
 
-    # 5. Remove the AD Application
+    # Remove the AD Application
     $adApplication = Get-AzureRmADApplication -DisplayNameStartWith $dotName -ErrorAction SilentlyContinue
     if($adApplication) {
         Remove-AzureRmADApplication -ApplicationObjectId $adApplication.ApplicationObjectId -Force
