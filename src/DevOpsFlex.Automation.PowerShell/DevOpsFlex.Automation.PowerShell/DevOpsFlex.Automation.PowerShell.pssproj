@@ -27,13 +27,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\DevOpsFlex.Environments.Models\DevOpsFlex.Environments.Models.csproj">
-      <Name>DevOpsFlex.Environments.Models</Name>
-      <Project>{c4a073e7-b507-4906-80cb-e48efe4b355e}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="AzureADHelpers.psm1" />
     <Compile Include="AzurePrincipalWithSecret.psm1" />
     <Compile Include="AzurePrincipalWithCert.psm1" />
