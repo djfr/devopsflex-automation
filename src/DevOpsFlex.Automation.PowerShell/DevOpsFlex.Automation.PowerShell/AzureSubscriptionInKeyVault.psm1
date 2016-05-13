@@ -8,15 +8,15 @@ function Scan-AzureStorage
     param()
     {
         [parameter(Mandatory=$true)]
-        [ValidateSet('Primary','Secondary')]
-        [string] $KeyType
+        [string] $KeyVaultName,
 
         [parameter(Mandatory=$true)]
-        [string] $KeyVaultName
+        [ValidateSet('Primary','Secondary')]
+        [string] $KeyType
     }
 
     Get-AzureStorageAccount | Get-AzureStorageKey | foreach {
-        Set-AzureKeyVaultSecret -VaultName $KeyVaultName -Name $_.StorageAccountName -SecretValue (ConvertTo-SecureString -String $_.$KeyType -AsPlainText –Force)
+        $void = Set-AzureKeyVaultSecret -VaultName $KeyVaultName -Name $_.StorageAccountName -SecretValue (ConvertTo-SecureString -String $_.$KeyType -AsPlainText –Force)
     }
 
     switch($KeyType)
@@ -27,7 +27,7 @@ function Scan-AzureStorage
     }
 
     Get-AzureRmStorageAccount | select StorageAccountName, @{Name="Key";Expression={(Get-AzureRmStorageAccountKey -ResourceGroupName $_.ResourceGroupName -Name $_.StorageAccountName)[$index].Value}} | foreach {
-        Set-AzureKeyVaultSecret -VaultName $KeyVaultName -Name $_.StorageAccountName -SecretValue (ConvertTo-SecureString -String $_.Key -AsPlainText –Force)
+        $void = Set-AzureKeyVaultSecret -VaultName $KeyVaultName -Name $_.StorageAccountName -SecretValue (ConvertTo-SecureString -String $_.Key -AsPlainText –Force)
     }
 }
 
@@ -36,13 +36,15 @@ function Scan-AzureServiceBus
     param()
     {
         [parameter(Mandatory=$true)]
-        [ValidateSet('Primary','Secondary')]
-        [string] $KeyType,
+        [string] $KeyVaultName,
 
-        [parameter(Mandatory=$true)]
-        [string] $KeyVaultName
+        [parameter(Mandatory=$false)]
+        [string] $SbAccessRuleName = 'RootManageSharedAccessKey'
     }
 
+    Get-AzureSBNamespace | foreach { Get-AzureSBAuthorizationRule -Namespace $_.Name } | where { $_.Name -eq 'RootManageSharedAccessKey' } | foreach {
+        $void = Set-AzureKeyVaultSecret -VaultName $KeyVaultName -Name $_.Namespace -SecretValue (ConvertTo-SecureString -String $_.ConnectionString -AsPlainText –Force)
+    }
 }
 
 function Scan-AzureSqlDatabase
@@ -60,12 +62,16 @@ funtion Register-AzureSubscriptionInKeyVault
     param()
     {
         [parameter(Mandatory=$true, Position=0)]
+        [string] $KeyVaultName,
+
+        [parameter(Mandatory=$true, Position=1)]
         [ValidateSet('Primary','Secondary')]
         [string] $KeyType,
 
-        [parameter(Mandatory=$true, Position=1)]
-        [string] $KeyVaultName
+        [parameter(Mandatory=$false)]
+        [string] $SbAccessRuleName = 'RootManageSharedAccessKey'
     }
 
-
+    Scan-AzureStorage -KeyVaultName $KeyVaultName -KeyType $KeyType
+    Scan-AzureServiceBus -KeyVaultName $KeyVaultName -SbAccessRuleName $SbAccessRuleName
 }
