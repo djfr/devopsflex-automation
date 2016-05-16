@@ -3,20 +3,23 @@
 #
 
 ### Scans both ASM and ARM storage accounts and pushes all relevant keys to KeyVault
-function Scan-AzureStorage
+function Register-AzureStorage
 {
-    param()
-    {
+    param(
         [parameter(Mandatory=$true)]
         [string] $KeyVaultName,
 
         [parameter(Mandatory=$true)]
         [ValidateSet('Primary','Secondary')]
-        [string] $KeyType
-    }
+        [string] $KeyType,
+
+        [parameter(Mandatory=$false)]
+        [string] $EnvironmentRegex
+    )
 
     Get-AzureStorageAccount | Get-AzureStorageKey | foreach {
-        $void = Set-AzureKeyVaultSecret -VaultName $KeyVaultName -Name $_.StorageAccountName -SecretValue (ConvertTo-SecureString -String $_.$KeyType -AsPlainText –Force)
+        $keyName = $_.StorageAccountName -replace $EnvironmentRegex, ''
+        $void = Set-AzureKeyVaultSecret -VaultName $KeyVaultName -Name $keyName -SecretValue (ConvertTo-SecureString -String  $_.$KeyType -AsPlainText –Force)
     }
 
     switch($KeyType)
@@ -26,41 +29,63 @@ function Scan-AzureStorage
         default {$keyIndex = 0}
     }
 
-    Get-AzureRmStorageAccount | select StorageAccountName, @{Name="Key";Expression={(Get-AzureRmStorageAccountKey -ResourceGroupName $_.ResourceGroupName -Name $_.StorageAccountName)[$index].Value}} | foreach {
-        $void = Set-AzureKeyVaultSecret -VaultName $KeyVaultName -Name $_.StorageAccountName -SecretValue (ConvertTo-SecureString -String $_.Key -AsPlainText –Force)
+    Get-AzureRmStorageAccount | select StorageAccountName, @{Name="Key";Expression={(Get-AzureRmStorageAccountKey -ResourceGroupName $_.ResourceGroupName -Name $_.StorageAccountName)[$keyIndex].Value}} | foreach {
+        $keyName = $_.StorageAccountName -replace $EnvironmentRegex, ''
+        $void = Set-AzureKeyVaultSecret -VaultName $KeyVaultName -Name $keyName -SecretValue (ConvertTo-SecureString -String $_.Key -AsPlainText –Force)
     }
 }
 
-function Scan-AzureServiceBus
+function Register-AzureServiceBus
 {
-    param()
-    {
+    param(
         [parameter(Mandatory=$true)]
         [string] $KeyVaultName,
 
         [parameter(Mandatory=$false)]
-        [string] $SbAccessRuleName = 'RootManageSharedAccessKey'
-    }
+        [string] $SbAccessRuleName,
+
+        [parameter(Mandatory=$false)]
+        [string] $EnvironmentRegex
+    )
 
     Get-AzureSBNamespace | foreach { Get-AzureSBAuthorizationRule -Namespace $_.Name } | where { $_.Name -eq 'RootManageSharedAccessKey' } | foreach {
-        $void = Set-AzureKeyVaultSecret -VaultName $KeyVaultName -Name $_.Namespace -SecretValue (ConvertTo-SecureString -String $_.ConnectionString -AsPlainText –Force)
+        $keyName = $_.Namespace -replace $EnvironmentRegex, ''
+        $void = Set-AzureKeyVaultSecret -VaultName $KeyVaultName -Name $keyName -SecretValue (ConvertTo-SecureString -String $_.ConnectionString -AsPlainText –Force)
     }
 }
 
-function Scan-AzureSqlDatabase
+function Register-AzureSqlDatabase
 {
-    param()
-    {
+    param(
         [parameter(Mandatory=$true)]
-        [string] $KeyVaultName
-    }
+        [string] $KeyVaultName,
 
+        [parameter(Mandatory=$true)]
+        [string] $SqlPassword,
+
+        [parameter(Mandatory=$false)]
+        [string] $EnvironmentRegex,
+
+        [switch] $SetSqlPassword
+    )
+
+    Get-AzureRmResourceGroup | Get-AzureRmSqlServer | Get-AzureRmSqlDatabase | where { $_.DatabaseName -ne 'master' } | foreach {
+        $server = $_ | Get-AzureRmSqlServer
+
+        # Set the SqlPassword on the server
+        if($SetSqlPassword) {
+            $server | Set-AzureRmSqlServer -SqlAdministratorPassword (ConvertTo-SecureString -String $SqlPassword -AsPlainText –Force)
+        }
+
+        $connectionString = "Server=tcp:$($server.ServerName).database.windows.net; Database=$($_.DatabaseName); User ID=$($server.SqlAdministratorLogin)@$($server.ServerName); Password=$SqlPassword; Trusted_Connection=False; Encrypt=True; MultipleActiveResultSets=True;"
+        $keyName = $_.DatabaseName -replace $EnvironmentRegex, ''
+        $void = Set-AzureKeyVaultSecret -VaultName $KeyVaultName -Name $keyName -SecretValue (ConvertTo-SecureString -String $connectionString -AsPlainText –Force)
+    }
 }
 
-funtion Register-AzureSubscriptionInKeyVault
+function Register-AzureSubscriptionInKeyVault
 {
-    param()
-    {
+    param(
         [parameter(Mandatory=$true, Position=0)]
         [string] $KeyVaultName,
 
@@ -68,10 +93,25 @@ funtion Register-AzureSubscriptionInKeyVault
         [ValidateSet('Primary','Secondary')]
         [string] $KeyType,
 
-        [parameter(Mandatory=$false)]
-        [string] $SbAccessRuleName = 'RootManageSharedAccessKey'
-    }
+        [parameter(Mandatory=$true, Position=2)]
+        [string] $SqlPassword,
 
-    Scan-AzureStorage -KeyVaultName $KeyVaultName -KeyType $KeyType
-    Scan-AzureServiceBus -KeyVaultName $KeyVaultName -SbAccessRuleName $SbAccessRuleName
+        [parameter(Mandatory=$false)]
+        [string] $StgEnvRegex = '(.{3})$',
+
+        [parameter(Mandatory=$false)]
+        [string] $SbEnvRegex = '(-[^-]*)$',
+
+        [parameter(Mandatory=$false)]
+        [string] $SqlEnvRegex = '(-[^-]*)$',
+
+        [parameter(Mandatory=$false)]
+        [string] $SbAccessRuleName = 'RootManageSharedAccessKey',
+
+        [switch] $SetSqlPassword
+    )
+
+    Register-AzureStorage -KeyVaultName $KeyVaultName -KeyType $KeyType -EnvironmentRegex $StgEnvRegex
+    Register-AzureServiceBus -KeyVaultName $KeyVaultName -SbAccessRuleName $SbAccessRuleName -EnvironmentRegex $SbEnvRegex
+    Register-AzureSqlDatabase -KeyVaultName $KeyVaultName -SqlPassword $SqlPassword -EnvironmentRegex $SqlEnvRegex -SetSqlPassword:$SetSqlPassword
 }
