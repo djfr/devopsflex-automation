@@ -30,6 +30,8 @@
     <Compile Include="AzureADHelpers.psm1" />
     <Compile Include="AzurePrincipalWithSecret.psm1" />
     <Compile Include="AzurePrincipalWithCert.psm1" />
+    <Compile Include="AzureSubscriptionInKeyVault.psm1" />
+    <Compile Include="Debug\RegisterAzureSubscriptionInKeyVault.ps1" />
     <Compile Include="Debug\ReloadModule.ps1" />
     <Compile Include="Debug\AzurePrincipalWithSecret.ps1" />
     <Compile Include="Debug\AzurePrincipalWithCert.ps1" />

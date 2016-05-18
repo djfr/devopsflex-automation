@@ -1,2 +1,2 @@
-﻿Remove-Module -Name DevOpsFlex.Environments.PowerShell -ErrorAction SilentlyContinue -Verbose
-Import-Module $PSScriptRoot\..\DevOpsFlex.Environments.PowerShell.psd1 -Force -Verbose
+﻿Remove-Module -Name DevOpsFlex.Automation.PowerShell -ErrorAction SilentlyContinue -Verbose
+Import-Module $PSScriptRoot\..\DevOpsFlex.Automation.PowerShell.psd1 -Force -Verbose
