@@ -22,7 +22,7 @@
     if($currentDiskSize -gt $SizeInGb)
     {
         $ConfirmPreference = 'Low'
-        if (!$PSCmdlet.ShouldContinue('Are you sure that you want to shrink the OS disk (and lose data)?',"You're shrinking the disk!")) {  
+        if (!$PSCmdlet.ShouldContinue('Are you sure that you want to shrink the OS disk (and lose data)?',"You're shrinking the disk!")) {
                 Write-Warning 'You were trying to shrink the disk but decided to abort'
                 Write-Warning 'No changes have been made'
                 return

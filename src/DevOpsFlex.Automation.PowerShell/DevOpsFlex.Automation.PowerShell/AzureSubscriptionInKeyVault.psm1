@@ -1,6 +1,5 @@
 ### Scans both ASM and ARM storage accounts and pushes all relevant keys to KeyVault
 
-
 function Get-EnvironmentForResourceName
 {
     param(
@@ -11,8 +10,8 @@ function Get-EnvironmentForResourceName
         [string] $Input
     )
 
-    $null = $Input -match $EnvironmentRegex
-    $null = $Matches[1] -match '\W*(\w*)'
+    $Input -match $EnvironmentRegex | Out-Null
+    $Matches[1] -match '\W*(\w*)' | Out-Null
     return $Matches[1]
 }
 
@@ -136,6 +135,10 @@ function Register-AzureSqlDatabase
         $null = Set-AzureKeyVaultSecret -VaultName $KeyVaultName -Name $keyName -SecretValue (ConvertTo-SecureString -String $connectionString -AsPlainText –Force)
     }
 }
+
+###########################################################
+#       Register-AzureSubscriptionInKeyVault
+###########################################################
 
 function Register-AzureSubscriptionInKeyVault
 {
