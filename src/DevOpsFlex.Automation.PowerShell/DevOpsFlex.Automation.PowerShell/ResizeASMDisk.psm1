@@ -10,7 +10,6 @@
         [int] $SizeInGb
     )
 
-    # Select Data Disk to resize
     $disk = Get-AzureOSDisk -VM $VM.VM
 
     $disk.MediaLink -match "https:\/\/(?<account>[^.]*)" | Out-Null

@@ -1,4 +1,7 @@
-﻿function Set-KeyVaultCertSecret
+﻿[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", Scope="Function", Target="*")]
+param()
+
+function Set-KeyVaultCertSecret
 {
     [CmdletBinding()]
     param
@@ -108,7 +111,7 @@ function New-AzurePrincipalWithCert
 
     $pwd = ConvertTo-SecureString -String $CertPassword -Force -AsPlainText
     $certPath = "$CertFolderPath$SystemName-$EnvironmentName.pfx"
-    $void = Export-PfxCertificate -cert "cert:\localmachine\my\$($cert.Thumbprint)" -FilePath $certPath -Password $pwd -ErrorAction Stop
+    $null = Export-PfxCertificate -cert "cert:\localmachine\my\$($cert.Thumbprint)" -FilePath $certPath -Password $pwd -ErrorAction Stop
 
     # Load the certificate
     $cert = New-Object System.Security.Cryptography.X509Certificates.X509Certificate($certPath, $pwd)
@@ -137,7 +140,7 @@ function New-AzurePrincipalWithCert
     Write-Host -ForegroundColor Green  "Application ID: $($azureAdApplication.ApplicationId)"
 
     # Create the Service Principal and connect it to the Application
-    $void = New-AzureRmADServicePrincipal -ApplicationId $azureAdApplication.ApplicationId
+    $null = New-AzureRmADServicePrincipal -ApplicationId $azureAdApplication.ApplicationId
 
     # Switch to the KeyVault Techops-Management subscription
     $currentSubId = (Get-AzureRmContext).Subscription.SubscriptionId
@@ -146,13 +149,13 @@ function New-AzurePrincipalWithCert
     }
 
     # Upload the cert and cert passwords to the right keyvaults
-    $void = Set-KeyVaultCertSecret -VaultName $systemVaultName -CertFolderPath $certPath -CertPassword $CertPassword -SecretName "$principalIdDashed-Cert"
-    $void = Set-AzureKeyVaultSecret -VaultName $systemVaultName -Name "$principalIdDashed-CertPwd" -SecretValue (ConvertTo-SecureString -String $CertPassword -AsPlainText –Force)
+    $null = Set-KeyVaultCertSecret -VaultName $systemVaultName -CertFolderPath $certPath -CertPassword $CertPassword -SecretName "$principalIdDashed-Cert"
+    $null = Set-AzureKeyVaultSecret -VaultName $systemVaultName -Name "$principalIdDashed-CertPwd" -SecretValue (ConvertTo-SecureString -String $CertPassword -AsPlainText –Force)
 
     # Populate the system keyvault with all relevant principal configuration information
-    $void = Set-AzureKeyVaultSecret -VaultName $systemVaultName -Name "$principalIdDashed-TenantId" -SecretValue (ConvertTo-SecureString -String $tenantId -AsPlainText –Force)
-    $void = Set-AzureKeyVaultSecret -VaultName $systemVaultName -Name "$principalIdDashed-IdentifierUri" -SecretValue (ConvertTo-SecureString -String $identifierUri -AsPlainText –Force)
-    $void = Set-AzureKeyVaultSecret -VaultName $systemVaultName -Name "$principalIdDashed-ApplicationId" -SecretValue (ConvertTo-SecureString -String $($azureAdApplication.ApplicationId) -AsPlainText –Force)
+    $null = Set-AzureKeyVaultSecret -VaultName $systemVaultName -Name "$principalIdDashed-TenantId" -SecretValue (ConvertTo-SecureString -String $tenantId -AsPlainText –Force)
+    $null = Set-AzureKeyVaultSecret -VaultName $systemVaultName -Name "$principalIdDashed-IdentifierUri" -SecretValue (ConvertTo-SecureString -String $identifierUri -AsPlainText –Force)
+    $null = Set-AzureKeyVaultSecret -VaultName $systemVaultName -Name "$principalIdDashed-ApplicationId" -SecretValue (ConvertTo-SecureString -String $($azureAdApplication.ApplicationId) -AsPlainText –Force)
 
     # Swap back to the subscription the user was in
     if(($VaultSubscriptionId -ne $null) -and ($currentSubId -ne $VaultSubscriptionId)) {
