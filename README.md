@@ -36,3 +36,12 @@ Gets the current user (from Get-AzureRmContext) AD object ID.
 #### Add-MeToKeyvault
 
 Adds the current user (from Get-AzureRmContext) to a specific keyvault with all permissions on both secrets and keys.
+
+#### Register-AzureSubscriptionInKeyVault
+
+Scans the current subscription and adds all relevant component keys and connections strings to a specific keyvault.
+Currently supports:
+
+- Azure Storage accounts (both ASM and ARM)
+- Azure ServiceBus namespaces
+- Azure SQL databases
