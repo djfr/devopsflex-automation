@@ -1,4 +1,5 @@
-### Scans both ASM and ARM storage accounts and pushes all relevant keys to KeyVault
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "", Scope="Function", Target="*")]
+param()
 
 function Get-EnvironmentForResourceName
 {
