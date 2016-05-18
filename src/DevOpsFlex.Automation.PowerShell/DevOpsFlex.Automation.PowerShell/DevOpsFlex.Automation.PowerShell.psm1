@@ -1,17 +1,25 @@
-<#
-    Root empty module
-    Just handles the sub-imports of all other modules
-#>
 
+# Import functions
 $rootModulePath = Split-Path $script:MyInvocation.MyCommand.Path
-Import-Module "$rootModulePath\AzureADHelpers.psm1"
-Import-Module "$rootModulePath\AzurePrincipalWithCert.psm1"
-Import-Module "$rootModulePath\AzurePrincipalWithSecret.psm1"
-Import-Module "$rootModulePath\AzureSubscriptionInKeyVault.psm1"
-Import-Module "$rootModulePath\ResizeASMDisk.psm1"
+. "$PSScriptRoot\AzureADHelpers.ps1"
+. "$PSScriptRoot\AzurePrincipalWithCert.ps1"
+. "$PSScriptRoot\AzurePrincipalWithSecret.ps1"
+. "$PSScriptRoot\AzureSubscriptionInKeyVault.ps1"
+. "$PSScriptRoot\ResizeASMDisk.ps1"
 
-Export-ModuleMember -Function @('Get-MyUserObjectId', 'Add-MeToKeyvault',                          # AzureADHelpers
-                                'New-AzurePrincipalWithCert', 'Remove-AzurePrincipalWithCert',     # AzurePrincipalWithCert
-                                'New-AzurePrincipalWithSecret', 'Remove-AzurePrincipalWithSecret', # AzurePrincipalWithSecret
-                                'Register-AzureSubscriptionInKeyVault',                            # AzureSubscriptionInKeyVault
-                                'Set-AzureVMOSDiskSize')                                           # ResizeASMDisk
+# Export functions
+Export-ModuleMember -Function @(
+    # AzureADHelpers
+    'Get-MyUserObjectId'
+    'Add-MeToKeyvault'
+    # AzurePrincipalWithCert
+    'New-AzurePrincipalWithCert'
+    'Remove-AzurePrincipalWithCert'
+    # AzurePrincipalWithSecret
+    'New-AzurePrincipalWithSecret'
+    'Remove-AzurePrincipalWithSecret'
+    # AzureSubscriptionInKeyVault
+    'Register-AzureSubscriptionInKeyVault'
+    # ResizeASMDisk
+    'Set-AzureVMOSDiskSize'
+    )

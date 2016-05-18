@@ -27,10 +27,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="AzureADHelpers.psm1" />
-    <Compile Include="AzurePrincipalWithSecret.psm1" />
-    <Compile Include="AzurePrincipalWithCert.psm1" />
-    <Compile Include="AzureSubscriptionInKeyVault.psm1" />
+    <Compile Include="AzureADHelpers.ps1" />
+    <Compile Include="AzurePrincipalWithSecret.ps1" />
+    <Compile Include="AzurePrincipalWithCert.ps1" />
+    <Compile Include="AzureSubscriptionInKeyVault.ps1" />
     <Compile Include="Debug\RegisterAzureSubscriptionInKeyVault.ps1" />
     <Compile Include="Debug\ReloadModule.ps1" />
     <Compile Include="Debug\AzurePrincipalWithSecret.ps1" />
@@ -38,7 +38,7 @@
     <Compile Include="DevOpsFlex.Automation.PowerShell.psd1" />
     <Compile Include="DevOpsFlex.Automation.PowerShell.psm1" />
     <Compile Include="DevOpsFlex.Automation.PowerShell.tests.ps1" />
-    <Compile Include="ResizeASMDisk.psm1" />
+    <Compile Include="ResizeASMDisk.ps1" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Debug\" />
