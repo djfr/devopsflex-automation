@@ -523,4 +523,184 @@
     </maml:relatedLinks>
   </command:command>
 
+
+  <!-- *********************************************** -->
+  <!-- *  Register-AzureSubscriptionInKeyVault       * -->
+  <!-- *********************************************** -->
+  <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10"
+                   xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10"
+                   xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10">
+    <command:details>
+      <command:name>Register-AzureSubscriptionInKeyVault</command:name>
+      <command:verb>Register</command:verb>
+      <command:noun>AzureSubscriptionInKeyVault</command:noun>
+      <maml:description>
+        <maml:para>Scans the current subscription for anything that looks like configuration and adds it to a KeyVault instance.</maml:para>
+      </maml:description>
+    </command:details>
+
+    <maml:description>
+      <maml:para>Scans the current subscription for anything that looks like configuration and adds it to a KeyVault instance.</maml:para>
+      <maml:para>Currently supports:</maml:para>
+      <maml:list>
+        <maml:listItem>
+          <maml:para>Azure Storage accounts (both ASM and ARM).</maml:para>
+        </maml:listItem>
+        <maml:listItem>
+          <maml:para>Azure ServiceBus namespaces.</maml:para>
+        </maml:listItem>
+        <maml:listItem>
+          <maml:para>Azure SQL databases.</maml:para>
+        </maml:listItem>
+      </maml:list>
+    </maml:description>
+
+    <command:syntax>
+      <maml:para>Register-AzureSubscriptionInKeyVault</maml:para>
+    </command:syntax>
+
+    <command:parameters>
+      <command:parameter required="true" globbing="false" pipelineInput="false" position="0">
+        <maml:name>KeyVaultName</maml:name>
+        <maml:description>
+          <maml:para>The name of the keyvault that you want to add configuration to.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true">String</command:parameterValue>
+        <dev:type>String</dev:type>
+      </command:parameter>
+    </command:parameters>
+
+    <command:parameters>
+      <command:parameter required="true" globbing="false" pipelineInput="false" position="1">
+        <maml:name>KeyType</maml:name>
+        <maml:description>
+          <maml:para>Specifies if we want to use 'Primary' or 'Secondary' keys when uploading to KeyVault.</maml:para>
+          <maml:para>This facilitates the rotation of keys on a scheduled basis and reduces the risk of downtime during the rotation.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true">String</command:parameterValue>
+        <dev:type>String</dev:type>
+      </command:parameter>
+    </command:parameters>
+
+    <command:parameters>
+      <command:parameter required="true" globbing="false" pipelineInput="false" position="2">
+        <maml:name>SqlPassword</maml:name>
+        <maml:description>
+          <maml:para>The SqlPassword for all the databases found for the server sa user.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true">String</command:parameterValue>
+        <dev:type>String</dev:type>
+      </command:parameter>
+    </command:parameters>
+
+    <command:parameters>
+      <command:parameter required="false" globbing="false" pipelineInput="true" position="named">
+        <maml:name>ResourceGroup</maml:name>
+        <maml:description>
+          <maml:para>Allows for a Resource Group filter.</maml:para>
+          <maml:para>This will only be applied for ARM resources that are bound to Resource Groups. Anything else will be unfiltered.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true">PSResourceGroup</command:parameterValue>
+        <dev:type>PSResourceGroup</dev:type>
+      </command:parameter>
+    </command:parameters>
+
+    <command:parameters>
+      <command:parameter required="false" globbing="false" pipelineInput="false" position="named">
+        <maml:name>EnvironmentFilter</maml:name>
+        <maml:description>
+          <maml:para>Allows for environment filters based on Regular Expressions.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true">String</command:parameterValue>
+        <dev:type>String</dev:type>
+      </command:parameter>
+    </command:parameters>
+
+    <command:parameters>
+      <command:parameter required="false" globbing="false" pipelineInput="false" position="named">
+        <maml:name>StgEnvRegex</maml:name>
+        <maml:description>
+          <maml:para>A regular expression that identifies the environment part on a storage account name.</maml:para>
+          <maml:para>Defaults to: '(.{3})$'.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true">String</command:parameterValue>
+        <dev:type>String</dev:type>
+      </command:parameter>
+    </command:parameters>
+
+    <command:parameters>
+      <command:parameter required="false" globbing="false" pipelineInput="false" position="named">
+        <maml:name>SbEnvRegex</maml:name>
+        <maml:description>
+          <maml:para>A regular expression that identifies the environment part on a service bus namespace.</maml:para>
+          <maml:para>Defaults to: '(-[^-]*)$'.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true">String</command:parameterValue>
+        <dev:type>String</dev:type>
+      </command:parameter>
+    </command:parameters>
+
+    <command:parameters>
+      <command:parameter required="false" globbing="false" pipelineInput="false" position="named">
+        <maml:name>SqlEnvRegex</maml:name>
+        <maml:description>
+          <maml:para>A regular expression that identifies the environment part on a sql database name.</maml:para>
+          <maml:para>Defaults to: '(-[^-]*)$'.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true">String</command:parameterValue>
+        <dev:type>String</dev:type>
+      </command:parameter>
+    </command:parameters>
+
+    <command:parameters>
+      <command:parameter required="false" globbing="false" pipelineInput="false" position="named">
+        <maml:name>SbAccessRuleName</maml:name>
+        <maml:description>
+          <maml:para>The name of the access rule for the service bus namespace that we want to send to KeyVault.</maml:para>
+          <maml:para>Defaults to: 'RootManageSharedAccessKey'.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true">String</command:parameterValue>
+        <dev:type>String</dev:type>
+      </command:parameter>
+    </command:parameters>
+
+    <command:parameters>
+      <command:parameter required="false" globbing="false" pipelineInput="false" position="named">
+        <maml:name>SetSqlPassword</maml:name>
+        <maml:description>
+          <maml:para>If switched on, the commandlet will set all the sa passwords to the password provided.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true">Switch</command:parameterValue>
+        <dev:type>Boolean</dev:type>
+      </command:parameter>
+    </command:parameters>
+
+    <command:parameters>
+      <command:parameter required="false" globbing="false" pipelineInput="false" position="named">
+        <maml:name>ARMOnly</maml:name>
+        <maml:description>
+          <maml:para>If switched on, only resources exposed in ARM will be scanned.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true">Switch</command:parameterValue>
+        <dev:type>Boolean</dev:type>
+      </command:parameter>
+    </command:parameters>
+
+    <command:inputTypes>
+      <!-- Add input type information here -->
+    </command:inputTypes>
+    <command:returnValues>
+      <!-- Add return value information here -->
+    </command:returnValues>
+    <maml:alertSet>
+      <!-- Add Note information here -->
+    </maml:alertSet>
+    <command:examples>
+      <!-- Add cmdlet examples here -->
+    </command:examples>
+    <maml:relatedLinks>
+      <!-- Add links to related content here -->
+    </maml:relatedLinks>
+  </command:command>
+
 </helpItems>
