@@ -33,8 +33,16 @@
 
     Start-Sleep -Seconds 120 -Verbose
 
+    # Cope with disks that were created without a Label and in this case label them with the disk name
+    if([string]::IsNullOrEmpty($disk.DiskLabel)) {
+        $diskLabel = $disk.DiskName
+    }
+    else {
+        $diskLabel = $disk.DiskLabel
+    }
+
     # Resize Data Disk to Larger Size
-    Update-AzureDisk -Label $disk.DiskLabel -DiskName $disk.DiskName -ResizedSizeInGB $SizeInGb -Verbose
+    Update-AzureDisk -Label $diskLabel -DiskName $disk.DiskName -ResizedSizeInGB $SizeInGb -Verbose
 
     # Start VM
     Start-AzureVM -VM $VM.VM -ServiceName $VM.ServiceName -Verbose
