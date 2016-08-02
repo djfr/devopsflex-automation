@@ -19,22 +19,3 @@ function Get-MyUserObjectId
 
     return $adUser.Id
 }
-
-
-###########################################################
-#       Add-MeToKeyvault
-###########################################################
-
-function Add-MeToKeyvault
-{
-    [CmdletBinding()]
-    param
-    (
-        [parameter(Mandatory=$true, Position=0)]
-        [string] $KeyvaultName
-    )
-
-    $userId = Get-MyUserObjectId
-    Set-AzureRmKeyVaultAccessPolicy -VaultName $KeyvaultName -ObjectId $userId -PermissionsToKeys all -PermissionsToSecrets all
-}
-

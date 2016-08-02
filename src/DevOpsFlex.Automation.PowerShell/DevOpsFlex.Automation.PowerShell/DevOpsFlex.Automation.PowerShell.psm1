@@ -1,5 +1,6 @@
 # Import functions
 . "$PSScriptRoot\AzureADHelpers.ps1"
+. "$PSScriptRoot\AzureKeyvaultHelpers.ps1"
 . "$PSScriptRoot\AzurePrincipalWithCert.ps1"
 . "$PSScriptRoot\AzurePrincipalWithSecret.ps1"
 . "$PSScriptRoot\AzureProfileHelpers.ps1"
@@ -10,7 +11,10 @@
 Export-ModuleMember -Function @(
     # AzureADHelpers
     'Get-MyUserObjectId'
+
+    # AzureKeyvaultHelpers
     'Add-MeToKeyvault'
+    'Add-UserToKeyVault'
 
     # AzurePrincipalWithCert
     'New-AzurePrincipalWithCert'
