@@ -27,7 +27,7 @@ function Register-AzureStorage
         [string] $KeyType,
 
         [parameter(Mandatory=$false)]
-        [Microsoft.Azure.Commands.Resources.Models.PSResourceGroup] $ResourceGroup,
+        [string] $ResourceGroup,
 
         [parameter(Mandatory=$false)]
         [string] $EnvironmentFilter,
@@ -58,7 +58,7 @@ function Register-AzureStorage
         $storageAccounts = Get-AzureRmStorageAccount
     }
     else {
-        $storageAccounts = Get-AzureRmStorageAccount -ResourceGroupName $ResourceGroup.ResourceGroupName
+        $storageAccounts = Get-AzureRmStorageAccount -ResourceGroupName $ResourceGroup
     }
 
     $storageAccounts | select StorageAccountName, @{Name="Key";Expression={(Get-AzureRmStorageAccountKey -ResourceGroupName $_.ResourceGroupName -Name $_.StorageAccountName)[$keyIndex].Value}} | foreach {
@@ -103,7 +103,7 @@ function Register-AzureSqlDatabase
         [string] $SqlPassword,
 
         [parameter(Mandatory=$false)]
-        [Microsoft.Azure.Commands.Resources.Models.PSResourceGroup] $ResourceGroup,
+        [string] $ResourceGroup,
 
         [parameter(Mandatory=$false)]
         [string] $EnvironmentFilter,
@@ -118,7 +118,7 @@ function Register-AzureSqlDatabase
         $rgs = Get-AzureRmResourceGroup
     }
     else {
-        $rgs = Get-AzureRmResourceGroup -Name $ResourceGroup.ResourceGroupName
+        $rgs = Get-AzureRmResourceGroup -Name $ResourceGroup
     }
 
     $rgs | Get-AzureRmSqlServer | Get-AzureRmSqlDatabase | where { $_.DatabaseName -ne 'master' } | foreach {
@@ -154,8 +154,8 @@ function Register-AzureSubscriptionInKeyVault
         [parameter(Mandatory=$true, Position=2)]
         [string] $SqlPassword,
 
-        [parameter(ValueFromPipeline=$true, Mandatory=$false)]
-        [Microsoft.Azure.Commands.Resources.Models.PSResourceGroup] $ResourceGroup,
+        [parameter(Mandatory=$false)]
+        [string] $ResourceGroup,
 
         [parameter(Mandatory=$false)]
         [string] $EnvironmentFilter,
