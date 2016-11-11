@@ -3,7 +3,7 @@ param
     [parameter(Mandatory=$true, Position=0)]
     [string] $ApiKey,
 
-    [parameter(Mandatory=$true, Position=1)]
+    [parameter(Mandatory=$false, Position=1)]
     [string] $FeedSource
 )
 

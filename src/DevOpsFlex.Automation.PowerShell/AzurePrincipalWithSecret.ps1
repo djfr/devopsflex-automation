@@ -30,7 +30,7 @@ function New-AzurePrincipalWithSecret
         [string] $PrincipalName
     )
 
-    # GUARD: There are no non letter characters on the Cert Name
+    # GUARD: There are no non letter characters on the Principal Name
     if(-not [string]::IsNullOrWhiteSpace($PrincipalName) -and -not ($PrincipalName -match "^([A-Za-z])*$")) {
         throw 'The CertName must be letters only, either lower and upper case. Cannot contain any digits or any non-alpha-numeric characters.'
     }
