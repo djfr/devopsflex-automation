@@ -4,7 +4,7 @@ param
     [string] $ApiKey,
 
     [parameter(Mandatory=$false, Position=1)]
-    [string] $FeedSource
+    [string] $FeedSource = $null
 )
 
 if(($FeedSource -ne $null) -and ((Get-PSRepository -Name EswPowerShell -ErrorAction SilentlyContinue) -eq $null)) {
