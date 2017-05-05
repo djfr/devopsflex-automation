@@ -49,4 +49,4 @@ Scans all subscriptions that the account has access to for both ARM and ASM VNet
 - Name
 - AddressPrefix
 - Type (ARM/ASM)
-- Subscription Name
+- Subscription Namer
