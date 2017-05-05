@@ -5,6 +5,7 @@
 . "$PSScriptRoot\AzurePrincipalWithSecret.ps1"
 . "$PSScriptRoot\AzureProfileHelpers.ps1"
 . "$PSScriptRoot\AzureSubscriptionInKeyVault.ps1"
+. "$PSScriptRoot\AzureVNetHelpers.ps1"
 . "$PSScriptRoot\ResizeASMDisk.ps1"
 
 # Export functions
@@ -31,6 +32,9 @@ Export-ModuleMember -Function @(
 
     # AzureSubscriptionInKeyVault
     'Register-AzureSubscriptionInKeyVault'
+
+    # AzureVNetHelpers
+    'Select-AzureAllVNets'
 
     # ResizeASMDisk
     'Set-AzureVMOSDiskSize'
