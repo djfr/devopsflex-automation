@@ -5,6 +5,7 @@ schema: 2.0.0
 ---
 
 # Add-UserToKeyVault
+
 ## SYNOPSIS
 {{Fill in the Synopsis}}
 
@@ -38,7 +39,7 @@ Aliases:
 
 Required: True
 Position: 0
-Default value: 
+Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
@@ -53,7 +54,7 @@ Aliases:
 
 Required: True
 Position: 1
-Default value: 
+Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```

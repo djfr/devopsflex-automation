@@ -5,6 +5,7 @@ schema: 2.0.0
 ---
 
 # New-AzurePrincipalWithCert
+
 ## SYNOPSIS
 Creates an Azure Service Principal that uses an x509 certificate to authenticate against the Azure AD.
 
@@ -56,7 +57,7 @@ Aliases:
 
 Required: True
 Position: 0
-Default value: 
+Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
@@ -72,7 +73,7 @@ Aliases:
 
 Required: True
 Position: 1
-Default value: 
+Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
@@ -87,7 +88,7 @@ Aliases:
 
 Required: True
 Position: 2
-Default value: 
+Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
@@ -102,7 +103,7 @@ Aliases:
 
 Required: True
 Position: 3
-Default value: 
+Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
@@ -117,7 +118,7 @@ Aliases:
 
 Required: True
 Position: 4
-Default value: 
+Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
@@ -132,7 +133,7 @@ Aliases:
 
 Required: False
 Position: 5
-Default value: 
+Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
@@ -149,7 +150,7 @@ Aliases:
 
 Required: False
 Position: Named
-Default value: 
+Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```

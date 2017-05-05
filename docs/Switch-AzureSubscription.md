@@ -5,6 +5,7 @@ schema: 2.0.0
 ---
 
 # Switch-AzureSubscription
+
 ## SYNOPSIS
 Help method with UI (Out-GridView) for switching across Azure subscriptions.
 

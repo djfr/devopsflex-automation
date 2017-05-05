@@ -5,6 +5,7 @@ schema: 2.0.0
 ---
 
 # Get-MyUserObjectId
+
 ## SYNOPSIS
 Gets the current user (from Get-AzureRmContext) AD object ID.
 

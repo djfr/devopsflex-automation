@@ -5,6 +5,7 @@ schema: 2.0.0
 ---
 
 # Add-MeToKeyvault
+
 ## SYNOPSIS
 Adds the current user (from Get-AzureRmContext) to a specific keyvault with all permissions on both secrets and keys.
 
@@ -42,7 +43,7 @@ Aliases:
 
 Required: True
 Position: 0
-Default value: 
+Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```

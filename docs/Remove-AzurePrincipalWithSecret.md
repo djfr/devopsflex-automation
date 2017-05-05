@@ -5,6 +5,7 @@ schema: 2.0.0
 ---
 
 # Remove-AzurePrincipalWithSecret
+
 ## SYNOPSIS
 Removes an Azure Service Principal that uses a password to authenticate against the Azure AD.
 
@@ -47,7 +48,7 @@ Aliases:
 
 Required: False
 Position: 0
-Default value: 
+Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
@@ -62,7 +63,7 @@ Aliases:
 
 Required: False
 Position: 1
-Default value: 
+Default value: None
 Accept pipeline input: True (ByPropertyName, ByValue)
 Accept wildcard characters: False
 ```
@@ -77,7 +78,7 @@ Aliases:
 
 Required: True
 Position: 2
-Default value: 
+Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```

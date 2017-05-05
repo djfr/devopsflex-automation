@@ -41,3 +41,12 @@ Currently supports:
 - Azure Storage accounts (both ASM and ARM)
 - Azure ServiceBus namespaces
 - Azure SQL databases
+
+#### [Select-AzureAllVNets](docs/Select-AzureAllVNets.md)
+
+Scans all subscriptions that the account has access to for both ARM and ASM VNets and lists the relevant bits:
+
+- Name
+- AddressPrefix
+- Type (ARM/ASM)
+- Subscription Name
