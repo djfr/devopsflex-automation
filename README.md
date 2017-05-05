@@ -3,13 +3,6 @@ devopsflex-automation
 
 PowerShell module to automate certain tasks that are used to complement ARM templates and other development support automation against Windows Azure.
 
-**DEV branch CI build**&nbsp;&nbsp;&nbsp;
-![](https://eshopworld.visualstudio.com/_apis/public/build/definitions/310eec01-7d3c-402e-b179-74a206e8d4e3/9/badge)
-
-**MASTER branch CI build**&nbsp;&nbsp;&nbsp;
-![](https://eshopworld.visualstudio.com/_apis/public/build/definitions/310eec01-7d3c-402e-b179-74a206e8d4e3/9/badge)
-
-
 ## Functions in this module
 
 #### [New-AzurePrincipalWithCert](docs/New-AzurePrincipalWithCert.md)
