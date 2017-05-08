@@ -34,7 +34,7 @@ Export-ModuleMember -Function @(
     'Register-AzureSubscriptionInKeyVault'
 
     # AzureVNetHelpers
-    'Select-AzureAllVNets'
+    'Get-AzureAllVNets'
 
     # ResizeASMDisk
     'Set-AzureVMOSDiskSize'

@@ -4,7 +4,7 @@ online version:
 schema: 2.0.0
 ---
 
-# Select-AzureAllVNets
+# Get-AzureAllVNets
 
 ## SYNOPSIS
 Help method to list all ASM and ARM VNets across all subscriptions that the account has access to.
@@ -12,7 +12,7 @@ Help method to list all ASM and ARM VNets across all subscriptions that the acco
 ## SYNTAX
 
 ```
-Select-AzureAllVNets
+Get-AzureAllVNets
 ```
 
 ## DESCRIPTION

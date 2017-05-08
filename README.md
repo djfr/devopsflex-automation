@@ -42,7 +42,7 @@ Currently supports:
 - Azure ServiceBus namespaces
 - Azure SQL databases
 
-#### [Select-AzureAllVNets](docs/Select-AzureAllVNets.md)
+#### [Get-AzureAllVNets](docs/Get-AzureAllVNets.md)
 
 Scans all subscriptions that the account has access to for both ARM and ASM VNets and lists the relevant bits:
 

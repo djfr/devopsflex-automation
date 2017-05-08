@@ -1,4 +1,12 @@
-function Select-AzureAllVNets
+class vNet
+{
+    [string] $Name
+    [string] $AddressSpace
+    [string] $Type
+    [string] $Subscription
+}
+
+function Get-AzureAllVNets
 {
 <#
 .SYNOPSIS
@@ -25,13 +33,12 @@ This will show you the list of all ARM and ASM VNets on all subscriptions you ha
         Get-AzureRmVirtualNetwork | % {
             $vNet = $_.Name
             $_.AddressSpace.AddressPrefixes | % {
-                $object = New-Object –TypeName PSObject
-                $object | Add-Member -MemberType NoteProperty –Name Name –Value $vNet
-                $object | Add-Member –MemberType NoteProperty –Name AddressSpace –Value $_
-                $object | Add-Member –MemberType NoteProperty –Name Type –Value ASM
-                $object | Add-Member –MemberType NoteProperty –Name Subscription –Value $sub
-
-                $vnets += $object
+                $vnets += [vNet]@{
+                              Name = $vNet;
+                              AddressSpace = $_;
+                              Type = 'ASM';
+                              Subscription = $sub;
+                          }
             }
         }
 
@@ -39,13 +46,12 @@ This will show you the list of all ARM and ASM VNets on all subscriptions you ha
         Get-AzureVNetSite | % {
             $vNet = $_.Name
             $_.AddressSpacePrefixes | % {
-                $object = New-Object –TypeName PSObject
-                $object | Add-Member -MemberType NoteProperty –Name Name –Value $vNet
-                $object | Add-Member –MemberType NoteProperty –Name AddressSpace –Value $_
-                $object | Add-Member –MemberType NoteProperty –Name Type –Value ARM
-                $object | Add-Member –MemberType NoteProperty –Name Subscription –Value $sub
-
-                $vnets += $object
+                $vnets += [vNet]@{
+                              Name = $vNet;
+                              AddressSpace = $_;
+                              Type = 'ASM';
+                              Subscription = $sub;
+                          }
             }
         }
     }
