@@ -16,7 +16,7 @@ Help method to list all ASM and ARM VNets across all subscriptions that the acco
 Help method to list all ASM and ARM VNets across all subscriptions that the account has access to.
 
 .EXAMPLE
-Select-AzureEswVNets | ft *
+Get-AzureAllVNets | ft *
 This will show you the list of all ARM and ASM VNets on all subscriptions you have access to and output an auto formatted table.
 #>
 
