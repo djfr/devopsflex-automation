@@ -50,3 +50,12 @@ Scans all subscriptions that the account has access to for both ARM and ASM VNet
 - AddressPrefix
 - Type (ARM/ASM)
 - Subscription Namer
+
+#### [New-SWRandomPassword](docs/New-SWRandomPassword.md)
+
+Helper method to generate strong passwords.
+
+#### [New-UserInKeyVault](docs/New-UserInKeyVault.md)
+
+Uses New-SWRandomPassword to generate a password for the new user account and stores everything
+in a specified KeyVault including full tags that allow for easy labeling of the secrets.
