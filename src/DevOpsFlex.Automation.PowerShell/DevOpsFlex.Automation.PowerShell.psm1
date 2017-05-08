@@ -16,6 +16,8 @@ Export-ModuleMember -Function @(
     # AzureKeyvaultHelpers
     'Add-MeToKeyvault'
     'Add-UserToKeyVault'
+    'New-SWRandomPassword'
+    'New-UserInKeyVault'
 
     # AzurePrincipalWithCert
     'New-AzurePrincipalWithCert'
