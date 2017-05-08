@@ -66,7 +66,7 @@ function New-SWRandomPassword {
         [ValidateRange(1,2147483647)]
         [int]$PasswordLength = 8,
         
-        [String[]]$InputStrings = @('abcdefghijkmnpqrstuvwxyz', 'ABCEFGHJKLMNPQRSTUVWXYZ', '23456789', '!"#%&'),
+        [String[]]$InputStrings = @('abcdefghijklmnopqrstuvwxyz', 'ABCEFGHIJKLMNOPQRSTUVWXYZ', '0123456789', '!"£$%^&*(){}[]'),
 
         [String] $FirstChar,
         
