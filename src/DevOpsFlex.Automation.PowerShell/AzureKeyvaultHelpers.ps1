@@ -259,4 +259,5 @@ function New-UserInKeyVault
                             -Verbose
 
     Write-Information "Generated password for the account $Username : $password"
+    Write-Output -InputObject $password
 }
