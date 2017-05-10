@@ -66,7 +66,7 @@ function New-SWRandomPassword {
         [ValidateRange(1,2147483647)]
         [int]$PasswordLength = 8,
         
-        [String[]]$InputStrings = @('abcdefghijklmnopqrstuvwxyz', 'ABCEFGHIJKLMNOPQRSTUVWXYZ', '0123456789', '!"£$%^&*(){}[]'),
+        [String[]]$InputStrings = @('abcdefghijklmnopqrstuvwxyz', 'ABCEFGHIJKLMNOPQRSTUVWXYZ', '0123456789', '!£$%^&*(){}[]'),
 
         [String] $FirstChar,
         
@@ -234,7 +234,10 @@ function New-UserInKeyVault
 
         [parameter(Mandatory=$true, Position=4)]
         [validateset("VM", "Fabric")]
-        [string] $Type
+        [string] $Type,
+
+        [int] $MinPasswordLength = 15,
+        [int] $MaxPasswordLength = 20
     )
 
     $password = New-SWRandomPassword -MinPasswordLength 15 -MaxPasswordLength 20
