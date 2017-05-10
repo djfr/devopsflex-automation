@@ -237,7 +237,7 @@ function New-UserInKeyVault
         [string] $Type
     )
 
-    $password = New-SWRandomPassword -MinPasswordLength 30 -MaxPasswordLength 50
+    $password = New-SWRandomPassword -MinPasswordLength 15 -MaxPasswordLength 20
 
     Set-AzureKeyVaultSecret -VaultName $KeyVaultName `
                             -Name "$Name-$Type-user".ToLower() `
