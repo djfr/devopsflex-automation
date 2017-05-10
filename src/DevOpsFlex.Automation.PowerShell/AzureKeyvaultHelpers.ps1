@@ -159,6 +159,7 @@ function Add-MeToKeyvault
 function Add-UserToKeyVault
 {
     [CmdletBinding()]
+    [OutputType([String])]
     param
     (
         [parameter(Mandatory=$true, Position=0)]
@@ -246,7 +247,7 @@ function New-UserInKeyVault
                                 ComponentType=$Type
                                 Type='Username'
                             } `
-                            -Verbose
+                            -Verbose > $null
 
     Set-AzureKeyVaultSecret -VaultName $KeyVaultName `
                             -Name "$Name-$Type-pwd".ToLower() `
@@ -256,7 +257,7 @@ function New-UserInKeyVault
                                 ComponentType=$Type
                                 Type='Password'
                             } `
-                            -Verbose
+                            -Verbose > $null
 
     Write-Information "Generated password for the account $Username : $password"
     Write-Output -InputObject $password
