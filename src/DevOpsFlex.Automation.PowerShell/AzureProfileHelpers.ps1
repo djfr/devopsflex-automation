@@ -89,8 +89,8 @@ Currently CmdletBinding only has internal support for -Verbose.
 
     [CmdletBinding()] param()
 
-    $sub = Get-AzureRmSubscription | select SubscriptionName, SubscriptionId | Out-GridView -PassThru
+    $sub = Get-AzureRmSubscription | select Name, Id | Out-GridView -PassThru
 
-    Select-AzureSubscription -SubscriptionId $sub.SubscriptionId -Verbose:($PSBoundParameters["Verbose"].IsPresent -eq $true)
-    Select-AzureRmSubscription -SubscriptionId $sub.SubscriptionId -Verbose:($PSBoundParameters["Verbose"].IsPresent -eq $true)
+    Select-AzureSubscription -SubscriptionId $sub.Id -Verbose:($PSBoundParameters["Verbose"].IsPresent -eq $true)
+    Select-AzureRmSubscription -SubscriptionId $sub.Id -Verbose:($PSBoundParameters["Verbose"].IsPresent -eq $true)
 }

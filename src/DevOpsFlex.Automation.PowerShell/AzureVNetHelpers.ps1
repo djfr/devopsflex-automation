@@ -25,9 +25,9 @@ This will show you the list of all ARM and ASM VNets on all subscriptions you ha
     $vnets = @()
 
     Get-AzureRmSubscription -WarningAction SilentlyContinue | % {
-        $sub = $_.SubscriptionName
-        Select-AzureRmSubscription -SubscriptionId $_.SubscriptionId -WarningAction SilentlyContinue > $null
-        Select-AzureSubscription -SubscriptionId $_.SubscriptionId -WarningAction SilentlyContinue > $null
+        $sub = $_.Name
+        Select-AzureRmSubscription -SubscriptionId $_.Id -WarningAction SilentlyContinue > $null
+        Select-AzureSubscription -SubscriptionId $_.Id -WarningAction SilentlyContinue > $null
 
         # ASM
         Get-AzureRmVirtualNetwork | % {
