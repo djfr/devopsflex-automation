@@ -4,6 +4,7 @@
 . "$PSScriptRoot\AzurePrincipalWithCert.ps1"
 . "$PSScriptRoot\AzurePrincipalWithSecret.ps1"
 . "$PSScriptRoot\AzureProfileHelpers.ps1"
+. "$PSScriptRoot\AzureSQLHelpers.ps1"
 . "$PSScriptRoot\AzureSubscriptionInKeyVault.ps1"
 . "$PSScriptRoot\AzureVNetHelpers.ps1"
 . "$PSScriptRoot\ResizeASMDisk.ps1"
@@ -31,6 +32,9 @@ Export-ModuleMember -Function @(
     'Reset-Alias'
     'Add-AzureAccounts'
     'Switch-AzureSubscription'
+
+    # AzureSQLHelpers
+    'New-AzureSQLDbOwner'
 
     # AzureSubscriptionInKeyVault
     'Register-AzureSubscriptionInKeyVault'
