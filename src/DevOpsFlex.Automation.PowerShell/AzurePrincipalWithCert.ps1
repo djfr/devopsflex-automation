@@ -182,7 +182,7 @@ function Remove-AzurePrincipalWithCert
             ValueFromPipeline=$true,
             ValueFromPipelineByPropertyName=$true,
             Position=1)]
-        [Microsoft.Azure.Commands.Resources.Models.ActiveDirectory.PSADApplication] $ADApplication,
+        [Microsoft.Open.AzureAD.Model.Application] $ADApplication,
 
         [parameter(Mandatory=$false, Position=2)]
         [string] $VaultSubscriptionId

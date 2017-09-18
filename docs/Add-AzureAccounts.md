@@ -1,5 +1,6 @@
 ---
 external help file: DevOpsFlex.Automation.PowerShell-help.xml
+Module Name: DevOpsFlex.Automation.PowerShell
 online version: 
 schema: 2.0.0
 ---

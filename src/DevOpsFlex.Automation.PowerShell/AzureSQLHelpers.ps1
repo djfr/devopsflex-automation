@@ -1,5 +1,38 @@
 ﻿function New-AzureSQLDbOwner
 {
+<#
+
+.SYNOPSIS
+Generes a user/password pair for Azure SQL authentication and adds that user as a dbowner for the target database.
+
+.DESCRIPTION
+Generes a user/password pair for Azure SQL authentication and adds that user as a dbowner for the target database.
+It then uploads the generated pair to keyvault with relevant tags applied.
+
+.PARAMETER SqlDbName
+The name of the Azure SQL database that we want to add the new dbowner user to.
+
+.PARAMETER SqlDbUser
+The Azure SQL username to use as login to create the generated user.
+This user needs to be sa in the database.
+
+.PARAMETER SqlDbPwd
+The Azure SQL password to use as login to create the generated user.
+This user needs to be sa in the database.
+
+.PARAMETER KeyVaultName
+The name of the keyvault where we are adding the generated username/password pair.
+
+.EXAMPLE
+New-AzureSQLDbOwner -SqlDbName my-sql-db -SqlDbUser my-SqlSaUser -SqlDbPassword my-SqlSaPwd -KeyVaultName my-keyvault
+Will generated a username/password pair and add is as a dbowner for my-sql-db database. It will use my-SqlSaUser/my-SqlSaPwd
+to create the new user, this needs to be an sa user with access to the master database.
+
+.FUNCTIONALITY
+Generates Azure SQL dbowner users.
+   
+#>
+
     [CmdletBinding()]
     param(
         [parameter(Mandatory = $true, Position = 1)]

@@ -114,7 +114,7 @@ function Remove-AzurePrincipalWithSecret
             ValueFromPipeline=$true,
             ValueFromPipelineByPropertyName=$true,
             Position=1)]
-        [Microsoft.Azure.Commands.Resources.Models.ActiveDirectory.PSADApplication] $ADApplication,
+        [Microsoft.Open.AzureAD.Model.Application] $ADApplication,
 
         [parameter(Mandatory=$true, Position=2)]
         [string] $VaultSubscriptionId
