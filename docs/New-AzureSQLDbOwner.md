@@ -8,7 +8,7 @@ schema: 2.0.0
 # New-AzureSQLDbOwner
 
 ## SYNOPSIS
-Generes a user/password pair for Azure SQL authentication and adds that user as a dbowner for the target database.
+Generates a user/password pair for Azure SQL authentication and adds that user as a dbowner for the target database.
 
 ## SYNTAX
 
