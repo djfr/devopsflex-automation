@@ -1,7 +1,7 @@
 ---
 external help file: DevOpsFlex.Automation.PowerShell-help.xml
 Module Name: DevOpsFlex.Automation.PowerShell
-online version: http://blog.simonw.se/powershell-generating-random-password-for-active-directory/
+online version: 
 schema: 2.0.0
 ---
 
