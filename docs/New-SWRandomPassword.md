@@ -1,6 +1,7 @@
 ---
 external help file: DevOpsFlex.Automation.PowerShell-help.xml
-online version: http://blog.simonw.se/powershell-generating-random-password-for-active-directory/
+Module Name: DevOpsFlex.Automation.PowerShell
+online version: 
 schema: 2.0.0
 ---
 
@@ -125,7 +126,7 @@ Aliases:
 
 Required: False
 Position: Named
-Default value: @('abcdefghijkmnpqrstuvwxyz', 'ABCEFGHJKLMNPQRSTUVWXYZ', '23456789', '!"#%&')
+Default value: @('abcdefghijklmnopqrstuvwxyz', 'ABCEFGHIJKLMNOPQRSTUVWXYZ', '0123456789', '!£$%^&*(){}[]#_')
 Accept pipeline input: False
 Accept wildcard characters: False
 ```

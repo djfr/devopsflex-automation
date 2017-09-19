@@ -59,3 +59,8 @@ Helper method to generate strong passwords.
 
 Uses New-SWRandomPassword to generate a password for the new user account and stores everything
 in a specified KeyVault including full tags that allow for easy labeling of the secrets.
+
+#### [New-AzureSQLDbOwner](docs/New-AzureSQLDbOwner.md)
+
+Generes a user/password pair for Azure SQL authentication and adds that user as a dbowner for the target database.
+It then uploads the generated pair to keyvault with relevant tags applied.

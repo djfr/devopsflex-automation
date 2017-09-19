@@ -27,6 +27,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="AzureSQLHelpers.ps1" />
     <Compile Include="AzureKeyvaultHelpers.ps1" />
     <Compile Include="AzureADHelpers.ps1" />
     <Compile Include="AzurePrincipalWithSecret.ps1" />

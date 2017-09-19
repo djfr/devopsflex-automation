@@ -1,6 +1,7 @@
 ---
 external help file: DevOpsFlex.Automation.PowerShell-help.xml
-online version: http://blog.simonw.se/powershell-generating-random-password-for-active-directory/
+Module Name: DevOpsFlex.Automation.PowerShell
+online version: 
 schema: 2.0.0
 ---
 
@@ -13,6 +14,7 @@ Generates a strong password for a Username and stores both the Username and Pass
 
 ```
 New-UserInKeyVault [-KeyvaultName] <String> [-Name] <String> [-Username] <String> [-Type] <String>
+ [-MinPasswordLength <Int32>] [-MaxPasswordLength <Int32>]
 ```
 
 ## DESCRIPTION
@@ -85,6 +87,36 @@ Aliases:
 Required: True
 Position: 5
 Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -MinPasswordLength
+{{Fill MinPasswordLength Description}}
+
+```yaml
+Type: Int32
+Parameter Sets: (All)
+Aliases: 
+
+Required: False
+Position: Named
+Default value: 15
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -MaxPasswordLength
+{{Fill MaxPasswordLength Description}}
+
+```yaml
+Type: Int32
+Parameter Sets: (All)
+Aliases: 
+
+Required: False
+Position: Named
+Default value: 20
 Accept pipeline input: False
 Accept wildcard characters: False
 ```

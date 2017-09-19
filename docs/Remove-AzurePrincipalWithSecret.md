@@ -1,6 +1,7 @@
 ---
 external help file: DevOpsFlex.Automation.PowerShell-Help.xml
-online version: http://blog.simonw.se/powershell-generating-random-password-for-active-directory/
+Module Name: DevOpsFlex.Automation.PowerShell
+online version: 
 schema: 2.0.0
 ---
 
@@ -12,7 +13,7 @@ Removes an Azure Service Principal that uses a password to authenticate against 
 ## SYNTAX
 
 ```
-Remove-AzurePrincipalWithSecret [[-ADApplicationId] <String>] [[-ADApplication] <PSADApplication>]
+Remove-AzurePrincipalWithSecret [[-ADApplicationId] <String>] [[-ADApplication] <Application>]
  [-VaultSubscriptionId] <String>
 ```
 
@@ -57,7 +58,7 @@ Accept wildcard characters: False
 The AD Application that we want removed.
 
 ```yaml
-Type: PSADApplication
+Type: Application
 Parameter Sets: (All)
 Aliases: 
 
