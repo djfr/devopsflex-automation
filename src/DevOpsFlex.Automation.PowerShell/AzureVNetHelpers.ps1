@@ -58,3 +58,81 @@ This will show you the list of all ARM and ASM VNets on all subscriptions you ha
 
     Write-Output $vnets # return
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### JUST WORKS IN ARM - by design
+function Disconnect-AzureEswNetworkSecurityGroups
+{
+    [CmdletBinding()]
+    param(
+        [parameter(Mandatory=$true, ValueFromPipeline=$true)]
+        [Microsoft.Azure.Commands.Network.Models.PSVirtualNetwork] $VNet,
+
+        [parameter(Mandatory=$false)]
+        [string] $Subnet
+    )
+
+    # IF SUBNET
+    $subnets = $VNet.Subnets
+
+    if($Subnet) {
+        $subnets = $subnets | ? { $_.Name -eq $Subnet }
+
+        if($subnets.Count -eq 0) {
+            throw "Couldn't find a subnet named $Subnet in the $($Vnet.Name) VNet"
+        }
+
+        $subnets[0]
+    }
+
+    if($subnets.Count -gt 1) {
+        $ConfirmPreference = 'Low'
+        if (!$PSCmdlet.ShouldContinue('Are you sure that you want to disconnect all NSGs from all subnets?',"You're removing all NSGs!")) {
+            Write-Warning "You were trying to disconnect all NSGs from the $($Vnet.Name) VNet but you decided to abort"
+            Write-Warning "No changes have been made"
+            return
+        }
+    }
+
+    $subnets | % { $_.NetworkSecurityGroup = $null }
+    $VNet | Set-AzureRmVirtualNetwork
+
+    ## HANDLE NICs
+}
+
+
+
+
+
+
+
+
+
