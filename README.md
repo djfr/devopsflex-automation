@@ -64,3 +64,8 @@ in a specified KeyVault including full tags that allow for easy labeling of the 
 
 Generes a user/password pair for Azure SQL authentication and adds that user as a dbowner for the target database.
 It then uploads the generated pair to keyvault with relevant tags applied.
+
+#### [Disconnect-AzureEswNetworkSecurityGroups](docs/Disconnect-AzureEswNetworkSecurityGroups.md)
+
+Kill switch for NSGs in ARM VNets and NICs. <br />
+Dissociates NSGs from VNets, Subnets and Nics in a fast and efficient manner.
