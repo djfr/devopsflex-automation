@@ -201,24 +201,20 @@ function Add-UserToKeyVault
 
 function New-UserInKeyVault
 {
-    <#
-    .Synopsis
-       Generates a strong password for a Username and stores both the Username and Password in the specified KeyVault.
+<#
+.Synopsis
+    Generates a strong password for a Username and stores both the Username and Password in the specified KeyVault.
 
-    .DESCRIPTION
-       Generates a strong password for a Username and stores both the Username and Password in the specified KeyVault.
+.DESCRIPTION
+    Generates a strong password for a Username and stores both the Username and Password in the specified KeyVault.
 
-    .EXAMPLE
-       New-UserInKeyVault -KeyvaultName 'mykeyvault' -Name 'myuser' -Username 'ausername' -Type 'VM'
+.EXAMPLE
+    New-UserInKeyVault -KeyvaultName 'mykeyvault' -Name 'myuser' -Username 'ausername' -Type 'VM'
+    Will generate a password for the user 'ausername' for a VM and store it in a named pair in keyvault 'mykeyvault' named 'myuser'.
 
-       Will generate a password for the user 'ausername' for a VM and store it in a named pair in keyvault 'mykeyvault' named 'myuser'.
-
-    .NOTES
-       Written by Simon Wåhlin, blog.simonw.se
-
-    .FUNCTIONALITY
-       Creates users stored in KeyVault for both DevOps automation code for VMs and Service Fabric
-    #>
+.FUNCTIONALITY
+    Creates users stored in KeyVault for both DevOps automation code for VMs and Service Fabric
+#>
 
     [CmdletBinding()]
     param

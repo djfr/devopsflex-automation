@@ -40,8 +40,9 @@ Export-ModuleMember -Function @(
     'Register-AzureSubscriptionInKeyVault'
 
     # AzureVNetHelpers
+    'Disconnect-AzureEswNetworkSecurityGroups'
     'Get-AzureAllVNets'
 
     # ResizeASMDisk
     'Set-AzureVMOSDiskSize'
-    )
+)
