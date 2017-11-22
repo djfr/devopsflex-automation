@@ -5,7 +5,7 @@
 . "$PSScriptRoot\AzurePrincipalWithSecret.ps1"
 . "$PSScriptRoot\AzureProfileHelpers.ps1"
 . "$PSScriptRoot\AzureSQLHelpers.ps1"
-. "$PSScriptRoot\AzureSubscriptionInKeyVault.ps1"
+. "$PSScriptRoot\AzureServicesInKeyVault.ps1"
 . "$PSScriptRoot\AzureVNetHelpers.ps1"
 . "$PSScriptRoot\ResizeASMDisk.ps1"
 
@@ -36,8 +36,11 @@ Export-ModuleMember -Function @(
     # AzureSQLHelpers
     'New-AzureSQLDbOwner'
 
-    # AzureSubscriptionInKeyVault
-    'Register-AzureSubscriptionInKeyVault'
+    # AzureServicesInKeyVault
+    'Register-AzureServiceBus'
+    'Register-AzureSqlDatabase'
+    'Register-AzureCosmosDB'
+    'Register-AzureRedisCache'
 
     # AzureVNetHelpers
     'Disconnect-AzureEswNetworkSecurityGroups'
