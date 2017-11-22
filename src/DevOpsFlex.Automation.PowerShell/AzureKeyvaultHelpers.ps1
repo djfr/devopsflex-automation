@@ -39,10 +39,11 @@ function New-SWRandomPassword {
        [String]
     .NOTES
        Written by Simon Wåhlin, blog.simonw.se
+       http://blog.simonw.se/powershell-generating-random-password-for-active-directory/
     .FUNCTIONALITY
        Generates random passwords
     .LINK
-       http://blog.simonw.se/powershell-generating-random-password-for-active-directory/
+       
    
     #>
 
