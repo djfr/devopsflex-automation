@@ -41,6 +41,9 @@ Currently CmdletBinding doesn't have any internal support built-in.
         if(($Environment -eq $null) -or ($_.Namespace -match "-$Environment`$")) {
             if(($Regex -eq $null) -or ($_.Namespace -match "$Regex")) {
                 $keyName = $_.Namespace.Remove($_.Namespace.LastIndexOf('-'))
+
+                Write-Output "Pushing $($keyName) to $($KeyVaultName)"
+
                 $null = Set-AzureKeyVaultSecret -VaultName $KeyVaultName -Name $keyName -SecretValue (ConvertTo-SecureString -String $_.ConnectionString -AsPlainText –Force)
             }
         }
@@ -102,7 +105,7 @@ Currently CmdletBinding doesn't have any internal support built-in.
         [string] $ConfigurationKeyVaultName
     )
 
-    if($ResourceGroup -eq $null) {
+    if(!$ResourceGroup) {
         $dbs = Get-AzureRmSqlServer | Get-AzureRmSqlDatabase | ? { $_.DatabaseName -ne 'master' }
     }
     else {
@@ -127,6 +130,8 @@ Currently CmdletBinding doesn't have any internal support built-in.
                 }
 
                 $connectionString = "Server=tcp:$($server.ServerName).database.windows.net; Database=$($_.DatabaseName); User ID=$sqlUser@$($server.ServerName); Password=$sqlPwd; Trusted_Connection=False; Encrypt=True; MultipleActiveResultSets=True;"
+
+                Write-Output "Pushing SQLConnectionString to $($KeyVaultName)"
 
                 $null = Set-AzureKeyVaultSecret -VaultName $KeyVaultName -Name 'SQLConnectionString' -SecretValue (ConvertTo-SecureString -String $connectionString -AsPlainText –Force)
             }
@@ -185,7 +190,9 @@ Currently CmdletBinding doesn't have any internal support built-in.
             if(($Regex -eq $null) -or ($_.Name -match "$Regex")) {
                 $keyName = $_.Name.Remove($_.Name.LastIndexOf('-')) 
                 
-                $keys = Invoke-AzureRmResourceAction -Action listKeys -ResourceType $rsType -ResourceGroupName $ResourceGroup -Name $_. -Force
+                $keys = Invoke-AzureRmResourceAction -Action listKeys -ResourceType $rsType -ResourceGroupName $ResourceGroup -ResourceName $_.Name -Force
+
+                Write-Output "Pushing $($keyName) to $($KeyVaultName)"
                 
                 $null = Set-AzureKeyVaultSecret -VaultName $KeyVaultName -Name $keyName -SecretValue (ConvertTo-SecureString -String $keys.primaryMasterKey -AsPlainText –Force)         
             }
@@ -236,7 +243,7 @@ Currently CmdletBinding doesn't have any internal support built-in.
         [string] $Regex
     )
 
-    if($ResourceGroup -eq $null) {
+    if(!$ResourceGroup) {
         $caches = Get-AzureRmRedisCache
     }
     else {
@@ -249,6 +256,9 @@ Currently CmdletBinding doesn't have any internal support built-in.
                 $keyName = $_.Name.Remove($_.Name.LastIndexOf('-')) 
                 
                 $primaryKey = (Get-AzureRmRedisCacheKey -ResourceGroupName $_.ResourceGroupName -Name $_.Name).PrimaryKey
+
+                Write-Output "Pushing $($keyName) to $($KeyVaultName)"
+
                 $null = Set-AzureKeyVaultSecret -VaultName $KeyVaultName -Name $keyName -SecretValue (ConvertTo-SecureString -String $primaryKey -AsPlainText –Force)         
             }
         }

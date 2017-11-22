@@ -37,10 +37,10 @@ Export-ModuleMember -Function @(
     'New-AzureSQLDbOwner'
 
     # AzureServicesInKeyVault
-    'Register-AzureServiceBus'
-    'Register-AzureSqlDatabase'
-    'Register-AzureCosmosDB'
-    'Register-AzureRedisCache'
+    'Register-AzureServiceBusInKeyVault'
+    'Register-AzureSqlDatabaseInKeyVault'
+    'Register-AzureCosmosDBInKeyVault'
+    'Register-AzureRedisCacheInKeyVault'
 
     # AzureVNetHelpers
     'Disconnect-AzureEswNetworkSecurityGroups'
