@@ -33,14 +33,25 @@ Gets the current user (from Get-AzureRmContext) AD object ID.
 
 Adds the current user (from Get-AzureRmContext) to a specific keyvault with all permissions on both secrets and keys.
 
-#### [Register-AzureSubscriptionInKeyVault](docs/Register-AzureSubscriptionInKeyVault.md)
+#### [Register-AzureServiceBusInKeyVault](docs/Register-AzureServiceBusInKeyVault.md)
 
-Scans the current subscription and adds all relevant component keys and connections strings to a specific keyvault.
-Currently supports:
+Adds Azure service bus connection strings as secrets to keyvault.
+Scans service bus namespaces for authorization rules and sets the keyvault secret to the connection string.
 
-- Azure Storage accounts (both ASM and ARM)
-- Azure ServiceBus namespaces
-- Azure SQL databases
+#### [Register-AzureSqlDatabaseInKeyVault](docs/Register-AzureSqlDatabaseInKeyVault.md)
+
+Adds Azure sql database connection strings as secrets to keyvault.
+Scans sql database instances based on the search criteria and sets the key vault secrets to the connection strings.
+
+#### [Register-AzureCosmosDBInKeyVault](docs/Register-AzureCosmosDBInKeyVault.md)
+
+Adds Azure cosmos db primary keys as secrets to keyvault.
+Scans cosmos db account instances based on the search criteria and sets the key vault secrets to the primary keys.
+
+#### [Register-AzureRedisCacheInKeyVault](docs/Register-AzureRedisCacheInKeyVault.md)
+
+Adds Azure redis cache primary keys as secrets to keyvault.
+Scans redis cache instances based on the search criteria and sets the key vault secrets to the primary keys.
 
 #### [Get-AzureAllVNets](docs/Get-AzureAllVNets.md)
 
