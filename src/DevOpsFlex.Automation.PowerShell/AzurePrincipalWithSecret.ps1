@@ -70,8 +70,6 @@ function New-AzurePrincipalWithSecret
                                                    -Password $PrincipalPassword `
                                                    -Verbose
 
-    Write-Host -ForegroundColor DarkYellow 'Write down this ID because you will need it for future reference.'
-    Write-Host -ForegroundColor DarkYellow 'You can still get it through PowerShell, but writing it down now will save you the hassle.'
     Write-Host -ForegroundColor Green  "Application ID: $($azureAdApplication.ApplicationId)"
 
     # Create the Service Principal and connect it to the Application

@@ -3,11 +3,11 @@
 Remove-Module -Name DevOpsFlex.Automation.PowerShell -ErrorAction SilentlyContinue -Verbose
 Import-Module $PSScriptRoot\..\DevOpsFlex.Automation.PowerShell.psd1 -Force -Verbose
 
-$azureAdApplication = New-AzurePrincipalWithCert -SystemName 'djfr' `
+$azureAdApplication = New-AzurePrincipalWithCert -SystemName 'colin' `
                                                  -PrincipalPurpose 'Authentication' `
                                                  -EnvironmentName 'test' `
-                                                 -CertFolderPath 'D:\Certificates' `
-                                                 -CertPassword 'djfrpwd' `
+                                                 -CertFolderPath 'C:\Certificates' `
+                                                 -CertPassword 'something123$' `
                                                  -VaultSubscriptionId $vaultSubscriptionId `
                                                  -PrincipalName 'Keyvault'
 
