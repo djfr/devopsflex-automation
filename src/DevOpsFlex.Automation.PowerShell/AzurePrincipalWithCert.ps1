@@ -35,8 +35,49 @@ function Set-KeyVaultCertSecret
 #       New-AzurePrincipalWithCert
 ###########################################################
 
-function New-AzurePrincipalWithCert
+function New-AzureRMPrincipalWithCert
 {
+<#
+.SYNOPSIS
+Adds AzureRM Active Directory Application and persists a cert to Key Vault for it.
+
+.DESCRIPTION
+1. Creates a new Azure Active Directory Application
+2. Creates a new cert in Azure Key Vault for the AAD Application.
+
+.PARAMETER SystemName 
+The system the application is for.
+
+.PARAMETER PrincipalPurpose
+The purpose of the principal Authentication or Configuration.
+
+.PARAMETER EnvironmentName
+The environment the application is for.
+
+.PARAMETER CertFolderPath
+Local path to where the cert will be created.
+
+.PARAMETER CertPassword
+The password for the cert.
+
+.PARAMETER VaultSubscriptionId
+The subscription Id that Key Vault is on.
+
+.PARAMETER PrincipalName
+The name of the Key Vault principal.
+
+.EXAMPLE
+New-AzurePrincipalWithCert -SystemName 'sys1' `
+                           -PrincipalPurpose 'Authentication' `
+                           -EnvironmentName 'test' `
+                           -CertFolderPath 'C:\Certificates' `
+                           -CertPassword 'something123$' `
+                           -VaultSubscriptionId '[ID HERE]' `
+                           -PrincipalName 'Keyvault'
+
+.NOTES
+Currently CmdletBinding doesn't have any internal support built-in.
+#>
     [CmdletBinding()]
     param
     (
@@ -162,8 +203,30 @@ function New-AzurePrincipalWithCert
 #       Remove-AzurePrincipalWithCert
 ###########################################################
 
-function Remove-AzurePrincipalWithCert
+function Remove-AzureRMPrincipalWithCert
 {
+<#
+.SYNOPSIS
+Removes the Azure Active Directory Application, Principal and the cert stored for it.
+
+.DESCRIPTION
+Removes the Azure Active Directory Application, Principal and the cert stored for it.
+
+.PARAMETER ADApplicationId 
+The Id of the Azure Active Directory Application you with to remove.
+
+.PARAMETER ADApplication
+The Azure Active Directory Application you with to remove.
+
+.PARAMETER VaultSubscriptionId
+The subscription Id that Key Vault is on.
+
+.EXAMPLE
+Remove-AzurePrincipalWithCert -ADApplicationId '[ID HERE]' -VaultSubscriptionId '[ID HERE]'
+
+.NOTES
+Currently CmdletBinding doesn't have any internal support built-in.
+#>
     [CmdletBinding()]
     param
     (

@@ -5,8 +5,44 @@ param()
 #       New-AzurePrincipalWithSecret
 ###########################################################
 
-function New-AzurePrincipalWithSecret
+function New-AzureRMPrincipalWithSecret
 {
+<#
+.SYNOPSIS
+Adds AzureRM Active Directory Application and persists secrets to Key Vault for it.
+
+.DESCRIPTION
+1. Creates a new Azure Active Directory Application
+2. Creates new secrets in Azure Key Vault for the AAD Application, namely the TenantId, IdentifierUri, ApplicationId and Application Secret
+
+.PARAMETER SystemName 
+The system the application is for.
+
+.PARAMETER PrincipalPurpose
+The purpose of the principal Authentication or Configuration.
+
+.PARAMETER EnvironmentName
+The environment the application is for.
+
+.PARAMETER PrincipalPassword
+The password for the principal.
+
+.PARAMETER VaultSubscriptionId
+The subscription Id that Key Vault is on.
+
+.PARAMETER PrincipalName
+The name of the Key Vault principal.
+
+.EXAMPLE
+New-AzurePrincipalWithSecret -SystemName 'sys1' `
+                             -PrincipalPurpose 'Authentication' `
+                             -EnvironmentName 'test' `
+                             -PrincipalPassword 'something123$' `
+                             -VaultSubscriptionId '[ID HERE]' `
+                             -PrincipalName 'test'
+.NOTES
+Currently CmdletBinding doesn't have any internal support built-in.
+#>
     [CmdletBinding()]
     param
     (
@@ -99,8 +135,30 @@ function New-AzurePrincipalWithSecret
 #       Remove-AzurePrincipalWithSecret
 ###########################################################
 
-function Remove-AzurePrincipalWithSecret
+function Remove-AzureRMPrincipalWithSecret
 {
+<#
+.SYNOPSIS
+Removes the Azure Active Directory Application, Principal and any secrets stored for it.
+
+.DESCRIPTION
+Removes the Azure Active Directory Application, Principal and any secrets stored for it.
+
+.PARAMETER ADApplicationId 
+The Id of the Azure Active Directory Application you with to remove.
+
+.PARAMETER ADApplication
+The Azure Active Directory Application you with to remove.
+
+.PARAMETER VaultSubscriptionId
+The subscription Id that Key Vault is on.
+
+.EXAMPLE
+Remove-AzurePrincipalWithSecret -ADApplicationId '[ID HERE]' -VaultSubscriptionId '[ID HERE]'
+
+.NOTES
+Currently CmdletBinding doesn't have any internal support built-in.
+#>
     [CmdletBinding()]
     param
     (
