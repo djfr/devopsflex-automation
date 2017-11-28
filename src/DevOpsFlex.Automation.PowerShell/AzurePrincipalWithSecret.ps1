@@ -32,19 +32,19 @@ function New-AzurePrincipalWithSecret
 
     # GUARD: There are no non letter characters on the Principal Name
     if(-not [string]::IsNullOrWhiteSpace($PrincipalName) -and -not ($PrincipalName -match "^([A-Za-z])*$")) {
-        throw 'The CertName must be letters only, either lower and upper case. Cannot contain any digits or any non-alpha-numeric characters.'
+        throw 'The PrincipalName must be letters only, either lower and upper case. Cannot contain any digits or any non-alpha-numeric characters.'
     }
 
     # Uniform all the namings
     if([string]::IsNullOrWhiteSpace($PrincipalName)) {
-        $principalIdDashed = "$($SystemName.ToLower())-$($PrincipalPurpose.ToLower())"
-        $principalIdDotted = "$($SystemName.ToLower()).$($PrincipalPurpose.ToLower())"
-        $identifierUri = "https://$($SystemName.ToLower()).$($PrincipalPurpose.ToLower()).$($EnvironmentName.ToLower())"
+        $principalIdDashed = "$($SystemName)-$($PrincipalPurpose)".ToLower()
+        $principalIdDotted = "$($SystemName).$($PrincipalPurpose)".ToLower()
+        $identifierUri = "https://$($SystemName).$($PrincipalPurpose).$($EnvironmentName)".ToLower()
     }
     else {
-        $principalIdDashed = "$($SystemName.ToLower())-$($PrincipalPurpose.ToLower())-$($PrincipalName.ToLower())"
-        $principalIdDotted = "$($SystemName.ToLower()).$($PrincipalPurpose.ToLower()).$($PrincipalName.ToLower())"
-        $identifierUri = "https://$($SystemName.ToLower()).$($PrincipalPurpose.ToLower()).$($EnvironmentName.ToLower()).$($PrincipalName.ToLower())"
+        $principalIdDashed = "$($SystemName)-$($PrincipalPurpose)-$($PrincipalName)".ToLower()
+        $principalIdDotted = "$($SystemName).$($PrincipalPurpose).$($PrincipalName.ToLower())"
+        $identifierUri = "https://$($SystemName).$($PrincipalPurpose).$($EnvironmentName).$($PrincipalName)".ToLower()
     }
 
     # GUARD: AD application already exists, return the existing ad application
@@ -55,7 +55,7 @@ function New-AzurePrincipalWithSecret
     }
 
     # GUARD: Certificate system vault exists
-    $systemVaultName = "$($SystemName.ToLower())-$($EnvironmentName.ToLower())"
+    $systemVaultName = "$($SystemName)-$($EnvironmentName)".ToLower()
     if((Get-AzureRmKeyVault -VaultName $systemVaultName) -eq $null) {
         throw "The system vault $systemVaultName doesn't exist in the current subscription. Create it before running this cmdlet!"
     }
@@ -114,7 +114,7 @@ function Remove-AzurePrincipalWithSecret
             ValueFromPipeline=$true,
             ValueFromPipelineByPropertyName=$true,
             Position=1)]
-        [Microsoft.Open.AzureAD.Model.Application] $ADApplication,
+        [object] $ADApplication,
 
         [parameter(Mandatory=$true, Position=2)]
         [string] $VaultSubscriptionId
@@ -140,23 +140,23 @@ function Remove-AzurePrincipalWithSecret
     }
 
     # Break the Identifier URI of the AD Application into it's individual components so that we can infer everything else.
-    if(-not ($identifierUri -match 'https:\/\/(?<system>[^.]*).(?<purpose>[^.]*).(?<environment>[^.]*).*(?<principalName>[^.]*)')) {
+    if(-not ($identifierUri -match 'https:\/\/(?<system>[^.]*).(?<purpose>[^.]*).(?<environment>[^.]*).(?<principalName>[^.]*)')) {
         throw "Can't infer the correct system information from the identifier URI [$identifierUri] in the AD Application, was this service principal created with this Module?"
     }
 
     $systemName = $Matches['system']
-    $certPurpose = $Matches['purpose']
+    $principalPurpose = $Matches['purpose']
     $environmentName = $Matches['environment']
     $principalName = $Matches['principalName']
 
     # Uniform all the namings
     if([string]::IsNullOrWhiteSpace($principalName)) {
-        $dashName = "$systemName-$certPurpose"
-        $dotName = "$systemName.$certPurpose"
+        $dashName = "$systemName-$principalName"
+        $dotName = "$systemName.$principalName"
     }
     else {
-        $dashName = "$systemName-$certPurpose-$cerName"
-        $dotName = "$systemName.$certPurpose.$cerName"
+        $dashName = "$systemName-$principalPurpose-$principalName"
+        $dotName = "$systemName.$principalPurpose.$principalName"
     }
 
     # Switch to the KeyVault Techops-Management subscription
@@ -165,7 +165,7 @@ function Remove-AzurePrincipalWithSecret
         Select-AzureRmSubscription -SubscriptionId $VaultSubscriptionId -ErrorAction Stop
     }
 
-    $systemVaultName = "$($systemName.ToLower())-$($environmentName.ToLower())"
+    $systemVaultName = "$($systemName)-$($environmentName)".ToLower() 
 
     # 1. Remove the principal configuration information from the system keyvault
     Remove-AzureKeyVaultSecret -VaultName $systemVaultName -Name "$dashName-TenantId" -Force -Confirm:$false
@@ -190,6 +190,6 @@ function Remove-AzurePrincipalWithSecret
     # 3. Remove the AD Application
     $adApplication = Get-AzureRmADApplication -DisplayNameStartWith $dotName -ErrorAction SilentlyContinue
     if($adApplication) {
-        Remove-AzureRmADApplication -ApplicationObjectId $adApplication.ApplicationObjectId -Force
+        Remove-AzureRmADApplication -ObjectId $adApplication.ObjectId -Force
     }
 }
