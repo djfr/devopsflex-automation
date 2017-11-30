@@ -8,6 +8,7 @@
 . "$PSScriptRoot\AzureServicesInKeyVault.ps1"
 . "$PSScriptRoot\AzureVNetHelpers.ps1"
 . "$PSScriptRoot\ResizeASMDisk.ps1"
+. "$PSScriptRoot\AutorestCreateProject.ps1"
 
 # Export functions
 Export-ModuleMember -Function @(
@@ -48,4 +49,7 @@ Export-ModuleMember -Function @(
 
     # ResizeASMDisk
     'Set-AzureVMOSDiskSize'
+
+	#AutorestCreateProject
+	'New-AutoRestProject'
 )
