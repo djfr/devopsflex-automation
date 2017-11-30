@@ -21,12 +21,12 @@ Export-ModuleMember -Function @(
     'New-UserInKeyVault'
 
     # AzurePrincipalWithCert
-    'New-AzureRMPrincipalWithCert'
-    'Remove-AzureRMPrincipalWithCert'
+    'New-AzurePrincipalWithCert'
+    'Remove-AzurePrincipalWithCert'
 
     # AzurePrincipalWithSecret
-    'New-AzureRMPrincipalWithSecret'
-    'Remove-AzureRMPrincipalWithSecret'
+    'New-AzurePrincipalWithSecret'
+    'Remove-AzurePrincipalWithSecret'
 
     # AzureProfileHelpers
     'Reset-Alias'

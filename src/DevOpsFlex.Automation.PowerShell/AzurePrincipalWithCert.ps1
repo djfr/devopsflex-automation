@@ -35,7 +35,7 @@ function Set-KeyVaultCertSecret
 #       New-AzurePrincipalWithCert
 ###########################################################
 
-function New-AzureRMPrincipalWithCert
+function New-AzurePrincipalWithCert
 {
 <#
 .SYNOPSIS
@@ -203,7 +203,7 @@ Currently CmdletBinding doesn't have any internal support built-in.
 #       Remove-AzurePrincipalWithCert
 ###########################################################
 
-function Remove-AzureRMPrincipalWithCert
+function Remove-AzurePrincipalWithCert
 {
 <#
 .SYNOPSIS

@@ -5,7 +5,7 @@ param()
 #       New-AzurePrincipalWithSecret
 ###########################################################
 
-function New-AzureRMPrincipalWithSecret
+function New-AzurePrincipalWithSecret
 {
 <#
 .SYNOPSIS
@@ -135,7 +135,7 @@ Currently CmdletBinding doesn't have any internal support built-in.
 #       Remove-AzurePrincipalWithSecret
 ###########################################################
 
-function Remove-AzureRMPrincipalWithSecret
+function Remove-AzurePrincipalWithSecret
 {
 <#
 .SYNOPSIS
