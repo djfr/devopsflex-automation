@@ -37,6 +37,47 @@ function Set-KeyVaultCertSecret
 
 function New-AzurePrincipalWithCert
 {
+<#
+.SYNOPSIS
+Adds AzureRM Active Directory Application and persists a cert to Key Vault for it.
+
+.DESCRIPTION
+1. Creates a new Azure Active Directory Application
+2. Creates a new cert in Azure Key Vault for the AAD Application.
+
+.PARAMETER SystemName 
+The system the application is for.
+
+.PARAMETER PrincipalPurpose
+The purpose of the principal Authentication or Configuration.
+
+.PARAMETER EnvironmentName
+The environment the application is for.
+
+.PARAMETER CertFolderPath
+Local path to where the cert will be created.
+
+.PARAMETER CertPassword
+The password for the cert.
+
+.PARAMETER VaultSubscriptionId
+The subscription Id that Key Vault is on.
+
+.PARAMETER PrincipalName
+The name of the Key Vault principal.
+
+.EXAMPLE
+New-AzurePrincipalWithCert -SystemName 'sys1' `
+                           -PrincipalPurpose 'Authentication' `
+                           -EnvironmentName 'test' `
+                           -CertFolderPath 'C:\Certificates' `
+                           -CertPassword 'something123$' `
+                           -VaultSubscriptionId '[ID HERE]' `
+                           -PrincipalName 'Keyvault'
+
+.NOTES
+Currently CmdletBinding doesn't have any internal support built-in.
+#>
     [CmdletBinding()]
     param
     (
@@ -70,25 +111,25 @@ function New-AzurePrincipalWithCert
 
     # Uniform all the namings
     if([string]::IsNullOrWhiteSpace($PrincipalName)) {
-        $principalIdDashed = "$($SystemName.ToLower())-$($PrincipalPurpose.ToLower())"
-        $principalIdDotted = "$($SystemName.ToLower()).$($PrincipalPurpose.ToLower())"
-        $identifierUri = "https://$($SystemName.ToLower()).$($PrincipalPurpose.ToLower()).$($EnvironmentName.ToLower())"
+        $principalIdDashed = "$($SystemName)-$($PrincipalPurpose)".ToLower()
+        $principalIdDotted = "$($SystemName).$($PrincipalPurpose)".ToLower()
+        $identifierUri = "https://$($SystemName).$($PrincipalPurpose).$($EnvironmentName)".ToLower()
     }
     else {
-        $principalIdDashed = "$($SystemName.ToLower())-$($PrincipalPurpose.ToLower())-$($PrincipalName.ToLower())"
-        $principalIdDotted = "$($SystemName.ToLower()).$($PrincipalPurpose.ToLower()).$($PrincipalName.ToLower())"
-        $identifierUri = "https://$($SystemName.ToLower()).$($PrincipalPurpose.ToLower()).$($EnvironmentName.ToLower()).$($PrincipalName.ToLower())"
+        $principalIdDashed = "$($SystemName)-$($PrincipalPurpose)-$($PrincipalName)".ToLower()
+        $principalIdDotted = "$($SystemName).$($PrincipalPurpose).$($PrincipalName)".ToLower()
+        $identifierUri = "https://$($SystemName).$($PrincipalPurpose).$($EnvironmentName).$($PrincipalName)".ToLower()
     }
 
     # GUARD: AD application already exists, return the existing ad application
-    $previousApplication = Get-AzureRmADApplication -DisplayNameStartWith $principalIdDotted
-    if($previousApplication -ne $null) {
+    $adApplication = Get-AzureRmADApplication -DisplayNameStartWith $principalIdDotted
+    if($adApplication -ne $null) {
         Write-Warning 'An AD Application Already exists that looks identical to what you are trying to create'
-        return $previousApplication
+        return $adApplication
     }
 
     # GUARD: Certificate system vault exists
-    $systemVaultName = "$($SystemName.ToLower())-$($EnvironmentName.ToLower())"
+    $systemVaultName = "$($SystemName)-$($EnvironmentName)".ToLower()
     if((Get-AzureRmKeyVault -VaultName $systemVaultName) -eq $null) {
         throw "The system vault $systemVaultName doesn't exist in the current subscription. Create it before running this cmdlet!"
     }
@@ -107,23 +148,16 @@ function New-AzurePrincipalWithCert
                                       -KeyExportPolicy Exportable `
                                       -Provider "Microsoft Enhanced RSA and AES Cryptographic Provider" `
                                       -NotAfter $notAfter `
-                                      -ErrorAction Stop
+                                      -NotBefore $currentDate `
+                                      -ErrorAction Stop                                      
 
     $pwd = ConvertTo-SecureString -String $CertPassword -Force -AsPlainText
     $certPath = "$CertFolderPath$SystemName-$EnvironmentName.pfx"
     $null = Export-PfxCertificate -cert "cert:\localmachine\my\$($cert.Thumbprint)" -FilePath $certPath -Password $pwd -ErrorAction Stop
 
     # Load the certificate
-    $cert = New-Object System.Security.Cryptography.X509Certificates.X509Certificate($certPath, $pwd)
-
-    Import-Module AzureRM.Resources
-    $keyCredential = New-Object  Microsoft.Azure.Commands.Resources.Models.ActiveDirectory.PSADKeyCredential
-    $keyCredential.StartDate = $currentDate
-    $keyCredential.EndDate= $endDate
-    $keyCredential.KeyId = [guid]::NewGuid()
-    $keyCredential.Type = 'AsymmetricX509Cert'
-    $keyCredential.Usage = 'Verify'
-    $keyCredential.Value = [System.Convert]::ToBase64String($cert.GetRawCertData())
+    $cert = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2($certPath, $pwd)
+    $KeyValue = [System.Convert]::ToBase64String($cert.GetRawCertData())
 
     # Aquire the tenant ID on the subscription we are creating the principal on, not on the vault subscription!
     $tenantId = (Get-AzureRmContext).Subscription.TenantId
@@ -132,11 +166,11 @@ function New-AzurePrincipalWithCert
     $azureAdApplication = New-AzureRmADApplication -DisplayName $principalIdDotted `
                                                    -HomePage $identifierUri `
                                                    -IdentifierUris $identifierUri `
-                                                   -KeyCredentials $keyCredential `
                                                    -Verbose
 
-    Write-Host -ForegroundColor DarkYellow 'Write down this ID because you will need it for future reference.'
-    Write-Host -ForegroundColor DarkYellow 'You can still get it through PowerShell, but writing it down now will save you the hassle.'
+    # Create a new Azure Active Directory Application Credential and link it to the previously created Application
+    New-AzureRmADAppCredential -ApplicationId $azureAdApplication.ApplicationId -StartDate $cert.NotBefore -EndDate $cert.NotAfter -CertValue ([System.Convert]::ToBase64String($cert.GetRawCertData()))
+
     Write-Host -ForegroundColor Green  "Application ID: $($azureAdApplication.ApplicationId)"
 
     # Create the Service Principal and connect it to the Application
@@ -171,6 +205,28 @@ function New-AzurePrincipalWithCert
 
 function Remove-AzurePrincipalWithCert
 {
+<#
+.SYNOPSIS
+Removes the Azure Active Directory Application, Principal and the cert stored for it.
+
+.DESCRIPTION
+Removes the Azure Active Directory Application, Principal and the cert stored for it.
+
+.PARAMETER ADApplicationId 
+The Id of the Azure Active Directory Application you with to remove.
+
+.PARAMETER ADApplication
+The Azure Active Directory Application you with to remove.
+
+.PARAMETER VaultSubscriptionId
+The subscription Id that Key Vault is on.
+
+.EXAMPLE
+Remove-AzurePrincipalWithCert -ADApplicationId '[ID HERE]' -VaultSubscriptionId '[ID HERE]'
+
+.NOTES
+Currently CmdletBinding doesn't have any internal support built-in.
+#>
     [CmdletBinding()]
     param
     (
@@ -182,7 +238,7 @@ function Remove-AzurePrincipalWithCert
             ValueFromPipeline=$true,
             ValueFromPipelineByPropertyName=$true,
             Position=1)]
-        [Microsoft.Open.AzureAD.Model.Application] $ADApplication,
+        [object] $ADApplication,
 
         [parameter(Mandatory=$false, Position=2)]
         [string] $VaultSubscriptionId
@@ -208,7 +264,7 @@ function Remove-AzurePrincipalWithCert
     }
 
     # Break the Identifier URI of the AD Application into it's individual components so that we can infer everything else.
-    if(-not ($identifierUri -match 'https:\/\/(?<system>[^.]*).(?<purpose>[^.]*).(?<environment>[^.]*).*(?<principalName>[^.]*)')) {
+    if(-not ($identifierUri -match 'https:\/\/(?<system>[^.]*).(?<purpose>[^.]*).(?<environment>[^.]*).(?<principalName>[^.]*)')) {
         throw "Can't infer the correct system information from the identifier URI [$identifierUri] in the AD Application, was this service principal created with this Module?"
     }
 
@@ -223,8 +279,8 @@ function Remove-AzurePrincipalWithCert
         $dotName = "$systemName.$principalPurpose"
     }
     else {
-        $dashName = "$systemName-$principalPurpose-$cerName"
-        $dotName = "$systemName.$principalPurpose.$cerName"
+        $dashName = "$systemName-$principalPurpose-$principalName"
+        $dotName = "$systemName.$principalPurpose.$principalName"
     }
 
     # Switch to the KeyVault Techops-Management subscription
@@ -233,7 +289,7 @@ function Remove-AzurePrincipalWithCert
         Select-AzureRmSubscription -SubscriptionId $VaultSubscriptionId -ErrorAction Stop
     }
 
-    $systemVaultName = "$($systemName.ToLower())-$($environmentName.ToLower())"
+    $systemVaultName = "$($systemName)-$($environmentName)".ToLower()
 
     # Remove the cert and cert password from the system keyvault
     Remove-AzureKeyVaultSecret -VaultName $systemVaultName -Name "$dashName-Cert" -Force -Confirm:$false
@@ -261,6 +317,6 @@ function Remove-AzurePrincipalWithCert
     # Remove the AD Application
     $adApplication = Get-AzureRmADApplication -DisplayNameStartWith $dotName -ErrorAction SilentlyContinue
     if($adApplication) {
-        Remove-AzureRmADApplication -ApplicationObjectId $adApplication.ApplicationObjectId -Force
+        Remove-AzureRmADApplication -ObjectId $adApplication.ObjectId -Force
     }
 }
