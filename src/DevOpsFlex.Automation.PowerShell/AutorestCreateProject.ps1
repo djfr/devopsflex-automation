@@ -1,42 +1,40 @@
-﻿function Autorest-CreateProject
+﻿function New-AutoRestProject
 {
    	[CmdletBinding()]
 	param(
-	[string]$defUrl,
-	[string]$namespace,
-	[string]$outputFolder="output",
-	[string]$lang="csharp",
-	[string]$config="release"
+	[Parameter(Mandatory=$true, Position=1)]
+	[string]$DefUrl,
+	[Parameter(Mandatory=$true, Position=2)]
+	[string]$Namespace,
+	[Parameter(Mandatory=$false, Position=3)]
+	[string]$OutputFolder="output"
 	)
-     try
-     {	
-		if (!$defUrl)
+		try
 		{
-			throw "Missing parameter value for definition file URL"
+			autorest --latest
+		}
+		catch
+		{
+			Write-Error "Autorest is not present on the system"
+			exit
 		}
 
-		if (!$namespace)
+		try
 		{
-			throw "Missing parameter value for namespace"
+			Invoke-WebRequest $DefUrl -o definition.json
+		}
+		catch
+		{
+			Write-Error "Problem retrieving definition file $DefUrl"
+            exit
 		}
 
-		autorest --latest
+		autorest --input-file=definition.json --csharp --output-folder=$OutputFolder --namespace=$Namespace
+		dotnet autorest-createproject -s definition.json -o $OutputFolder
 
-		"Definition URL :$defUrl"
-		"Language :$lang"
-		"Output folder :$outputFolder"
-		"Configuration :$config"
+		pushd $OutputFolder
 
-		iwr $defUrl -o definition.json
-		autorest --input-file=definition.json --$lang --output-folder=$outputFolder --namespace=$namespace
-		dotnet autorest-createproject -s definition.json -o $outputFolder
+		dotnet build -c release
 
-		pushd $outputFolder
-		dotnet build -c $config
 		popd
-    }
-    catch
-    {
-        throw $_.Exception.Message       
-    }	
 }

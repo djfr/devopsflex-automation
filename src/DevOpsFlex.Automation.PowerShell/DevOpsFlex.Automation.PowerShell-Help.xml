@@ -896,4 +896,84 @@
     </maml:relatedLinks>
   </command:command>
 
+  <!-- *********************************************** -->
+  <!-- *  New-AutoRestProject         * -->
+  <!-- *********************************************** -->
+  <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10"
+                   xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10"
+                   xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10">
+    <command:details>
+      <command:name>New-AutoRestProject</command:name>
+      <command:verb>New</command:verb>
+      <command:noun>AutoRestProject</command:noun>
+      <maml:description>
+        <maml:para>generates, builds and packs c# client side code for given JSON Swagger URL</maml:para>
+      </maml:description>
+    </command:details>
+
+    <maml:description>
+      <maml:para>generate, build and pack nuget package for given JSON Swagger input</maml:para>
+      <maml:para>Currently supports:</maml:para>
+      <maml:list>
+        <maml:listItem>
+          <maml:para>win10-x64</maml:para>
+        </maml:listItem>
+      </maml:list>
+    </maml:description>
+
+    <command:syntax>
+      <maml:para>New-AutoRestProject</maml:para>
+    </command:syntax>
+
+    <command:parameters>
+      <command:parameter required="true" globbing="false" pipelineInput="false" position="1">
+        <maml:name>DefUrl</maml:name>
+        <maml:description>
+          <maml:para>URL for the Swagger definition JSON file</maml:para>
+        </maml:description>
+        <command:parameterValue required="true">String</command:parameterValue>
+        <dev:type>String</dev:type>
+      </command:parameter>
+    </command:parameters>
+
+    <command:parameters>
+      <command:parameter required="true" globbing="false" pipelineInput="false" position="2">
+        <maml:name>Namespace</maml:name>
+        <maml:description>
+          <maml:para>Namespace to put generated code into</maml:para>
+        </maml:description>
+        <command:parameterValue required="true">String</command:parameterValue>
+        <dev:type>String</dev:type>
+      </command:parameter>
+    </command:parameters>
+
+    <command:parameters>
+      <command:parameter required="false" globbing="false" pipelineInput="false" position="3">
+        <maml:name>OutputFolder</maml:name>
+        <maml:description>
+          <maml:para>Output folder</maml:para>
+        </maml:description>
+        <command:parameterValue required="true">String</command:parameterValue>
+        <dev:type>String</dev:type>
+      </command:parameter>
+    </command:parameters>
+
+   
+    <command:inputTypes>
+      <!-- Add input type information here -->
+    </command:inputTypes>
+    <command:returnValues>
+      <!-- Add return value information here -->
+    </command:returnValues>
+    <maml:alertSet>
+      <!-- Add Note information here -->
+    </maml:alertSet>
+    <command:examples>
+      <!-- Add cmdlet examples here -->
+    </command:examples>
+    <maml:relatedLinks>
+      <!-- Add links to related content here -->
+    </maml:relatedLinks>
+  </command:command>
+
 </helpItems>

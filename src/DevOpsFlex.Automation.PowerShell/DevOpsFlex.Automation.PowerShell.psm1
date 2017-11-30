@@ -51,5 +51,5 @@ Export-ModuleMember -Function @(
     'Set-AzureVMOSDiskSize'
 
 	#AutorestCreateProject
-	'Autorest-CreateProject'
+	'New-AutoRestProject'
 )
