@@ -15,7 +15,7 @@
 		}
 		catch
 		{
-			Write-Error "Autorest is not present on the system"
+			Write-Error "Autorest is not present on the system $_.Exception.Message"
 			exit
 		}
 
