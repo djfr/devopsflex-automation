@@ -18,6 +18,7 @@ Export-ModuleMember -Function @(
     # AzureKeyvaultHelpers
     'Add-MeToKeyvault'
     'Add-UserToKeyVault'
+    'Get-EswAadAuthFile'
     'New-SWRandomPassword'
     'New-UserInKeyVault'
 
@@ -50,6 +51,6 @@ Export-ModuleMember -Function @(
     # ResizeASMDisk
     'Set-AzureVMOSDiskSize'
 
-	#AutorestCreateProject
-	'New-AutoRestProject'
+    #AutorestCreateProject
+    'New-AutoRestProject'
 )

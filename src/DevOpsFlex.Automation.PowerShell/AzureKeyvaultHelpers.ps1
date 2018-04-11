@@ -262,3 +262,59 @@ function New-UserInKeyVault
     Write-Information "Generated password for the account $Username : $password"
     Write-Output -InputObject $password
 }
+
+function Get-EswAadAuthFile
+{
+<#
+.Synopsis
+Gets the contents of the keyvault and maps it to an Azure auth settings file.
+
+.DESCRIPTION
+Gets the contents of the keyvault and maps it to an Azure auth settings file.
+Overrides the current file if it already exists, which is the desired behaviour, since what's on keyvault is the final set of settings.
+
+You need to be loged in azure with 'Login-AzAccount' and you need to have LIST and READ rights on secrets on the target key vault.
+
+.PARAMETER KeyvaultName
+The name of the source key vault.
+
+.PARAMETER FileLocation
+The file location (folder) where we are saving to.
+Defaults to %LOCALAPPDATA%\Eshopworld
+
+.PARAMETER FileName
+The name of the file.
+Defaults to developer.azureauth
+
+.EXAMPLE
+Get-EswAadAuthFile -KeyvaultName 'my-kv'
+Maps the contents of the 'my-kv' keyvault to the file '%LOCALAPPDATA%\Eshopworld\developer.azureauth'.
+
+.EXAMPLE
+Get-EswAadAuthFile -KeyvaultName 'my-kv' -FileLocation 'C:\MyFolder' -FileName 'myfile.azureauth'
+Maps the contents of the 'my-kv' keyvault to the file 'C:\MyFolder\myfile.azureauth'.
+#>
+
+    [CmdletBinding()]
+    param
+    (
+        [parameter(Mandatory=$true, Position=1)]
+        [string] $KeyvaultName,
+
+        [parameter(Mandatory=$false)]
+        [string] $FileLocation = "$($env:LOCALAPPDATA)\Eshopworld",
+
+        [parameter(Mandatory=$false)]
+        [string] $FileName = "developer.azureauth"
+    )
+
+    New-Item -ItemType Directory -Path $FileLocation -Force > $null
+    $authPayload = @{}
+
+    Get-AzureKeyVaultSecret -VaultName $KeyvaultName | % {
+        $secret = Get-AzureKeyVaultSecret -VaultName $KeyvaultName -Name $_.Name
+        $authPayload.Add($secret.Name, $secret.SecretValueText)
+    }
+
+    Set-Content -Value ($authPayload | ConvertTo-Json) -Path (Join-Path $FileLocation $FileName) > $null
+}
