@@ -1,7 +1,7 @@
 ---
 external help file: DevOpsFlex.Automation.PowerShell-help.xml
 Module Name: DevOpsFlex.Automation.PowerShell
-online version: 
+online version:
 schema: 2.0.0
 ---
 
@@ -15,13 +15,13 @@ Generates one or more complex passwords designed to fulfill the requirements for
 ### FixedLength (Default)
 ```
 New-SWRandomPassword [-PasswordLength <Int32>] [-InputStrings <String[]>] [-FirstChar <String>]
- [-Count <Int32>]
+ [-Count <Int32>] [<CommonParameters>]
 ```
 
 ### RandomLength
 ```
 New-SWRandomPassword [-MinPasswordLength <Int32>] [-MaxPasswordLength <Int32>] [-InputStrings <String[]>]
- [-FirstChar <String>] [-Count <Int32>]
+ [-FirstChar <String>] [-Count <Int32>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -29,7 +29,7 @@ Generates one or more complex passwords designed to fulfill the requirements for
 
 ## EXAMPLES
 
-### -------------------------- EXAMPLE 1 --------------------------
+### EXAMPLE 1
 ```
 New-SWRandomPassword
 ```
@@ -38,7 +38,7 @@ C&3SX6Kn
 
 Will generate one password with a length between 8  and 12 chars.
 
-### -------------------------- EXAMPLE 2 --------------------------
+### EXAMPLE 2
 ```
 New-SWRandomPassword -MinPasswordLength 8 -MaxPasswordLength 12 -Count 4
 ```
@@ -50,7 +50,7 @@ New-SWRandomPassword -MinPasswordLength 8 -MaxPasswordLength 12 -Count 4
 
 Will generate four passwords, each with a length of between 8 and 12 chars.
 
-### -------------------------- EXAMPLE 3 --------------------------
+### EXAMPLE 3
 ```
 New-SWRandomPassword -InputStrings abc, ABC, 123 -PasswordLength 4
 ```
@@ -59,7 +59,7 @@ New-SWRandomPassword -InputStrings abc, ABC, 123 -PasswordLength 4
 
 Generates a password with a length of 4 containing atleast one char from each InputString
 
-### -------------------------- EXAMPLE 4 --------------------------
+### EXAMPLE 4
 ```
 New-SWRandomPassword -InputStrings abc, ABC, 123 -PasswordLength 4 -FirstChar abcdefghijkmnpqrstuvwxyzABCEFGHJKLMNPQRSTUVWXYZ
 ```
@@ -107,7 +107,7 @@ Accept wildcard characters: False
 ```yaml
 Type: Int32
 Parameter Sets: FixedLength
-Aliases: 
+Aliases:
 
 Required: False
 Position: Named
@@ -122,7 +122,7 @@ Accept wildcard characters: False
 ```yaml
 Type: String[]
 Parameter Sets: (All)
-Aliases: 
+Aliases:
 
 Required: False
 Position: Named
@@ -137,7 +137,7 @@ Accept wildcard characters: False
 ```yaml
 Type: String
 Parameter Sets: (All)
-Aliases: 
+Aliases:
 
 Required: False
 Position: Named
@@ -152,7 +152,7 @@ Accept wildcard characters: False
 ```yaml
 Type: Int32
 Parameter Sets: (All)
-Aliases: 
+Aliases:
 
 Required: False
 Position: Named
@@ -160,6 +160,10 @@ Default value: 1
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
+
+### CommonParameters
+This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable.
+For more information, see about_CommonParameters (http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## INPUTS
 
@@ -169,8 +173,6 @@ Accept wildcard characters: False
 
 ## NOTES
 Written by Simon Wåhlin, blog.simonw.se
+http://blog.simonw.se/powershell-generating-random-password-for-active-directory/
 
 ## RELATED LINKS
-
-[http://blog.simonw.se/powershell-generating-random-password-for-active-directory/](http://blog.simonw.se/powershell-generating-random-password-for-active-directory/)
-

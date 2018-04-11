@@ -5,35 +5,34 @@ online version:
 schema: 2.0.0
 ---
 
-# Reset-Alias
+# Register-AzureServiceBusInKeyVault
 
 ## SYNOPSIS
-Creates and alias with replace functionality.
+Adds Azure service bus connection strings as secrets to keyvault.
 
 ## SYNTAX
 
 ```
-Reset-Alias [-Name] <String> [-Value] <String> [-Scope <String>] [<CommonParameters>]
+Register-AzureServiceBusInKeyVault [-KeyVaultName] <String> [[-Environment] <String>] [[-Regex] <String>]
+ [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-Checks if the alias already exists, if it does calls Set-Alias on it, if it doesn't it will create a new alias using New-Alias.
-Relays the alias scope.
+Scans service bus namespaces for authorization rules and sets the keyvault secret to the connection string.
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-Reset-Alias list get-childitem
+Register-AzureServiceBus -KeyVaultName "test-vault" -Environment "uat" -Regex "(esw)"
 ```
 
-This command creates an alias named "list" to represent the Get-ChildItem cmdlet on the "Global" scope.
+This command sets secrets in the test-vault for all environments ending in uat and containing esw in their namespace.
 
 ## PARAMETERS
 
-### -Name
-Specifies the new alias.
-You can use any alphanumeric characters in an alias, but the first character cannot be a number.
+### -KeyVaultName
+Specifies the key vault to set the secrets in.
 
 ```yaml
 Type: String
@@ -47,26 +46,8 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Value
-Specifies the name of the cmdlet or command element that is being aliased.
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: True
-Position: 2
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Scope
-Specifies the scope of the new alias.
-Valid values are "Global", "Local", or "Script", or a number relative to the current scope (0 through the number of scopes, where 0 is the current scope and 1 is its parent).
-"Local" is the default.
-For more information, see about_Scopes.
+### -Environment
+Specifies the environment to limit the service bus namespace on.
 
 ```yaml
 Type: String
@@ -74,8 +55,23 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: Named
-Default value: Global
+Position: 2
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Regex
+Specifies the regex to limit the service bus namespace on.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 3
+Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```

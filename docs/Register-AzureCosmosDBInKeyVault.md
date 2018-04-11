@@ -5,35 +5,34 @@ online version:
 schema: 2.0.0
 ---
 
-# Reset-Alias
+# Register-AzureCosmosDBInKeyVault
 
 ## SYNOPSIS
-Creates and alias with replace functionality.
+Adds Azure cosmos db primary keys as secrets to keyvault.
 
 ## SYNTAX
 
 ```
-Reset-Alias [-Name] <String> [-Value] <String> [-Scope <String>] [<CommonParameters>]
+Register-AzureCosmosDBInKeyVault [-KeyVaultName] <String> [-ResourceGroup] <String> [[-Environment] <String>]
+ [[-Regex] <String>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-Checks if the alias already exists, if it does calls Set-Alias on it, if it doesn't it will create a new alias using New-Alias.
-Relays the alias scope.
+Scans cosmos db account instances based on the search criteria and sets the key vault secrets to the primary keys.
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-Reset-Alias list get-childitem
+Register-AzureCosmosDB -KeyVaultName "test-vault" -ResourceGroup "test-rg" -Environment "uat" -Regex "(esw)"
 ```
 
-This command creates an alias named "list" to represent the Get-ChildItem cmdlet on the "Global" scope.
+This command sets secrets in the test-vault for all environments ending in uat and containing esw in their name.
 
 ## PARAMETERS
 
-### -Name
-Specifies the new alias.
-You can use any alphanumeric characters in an alias, but the first character cannot be a number.
+### -KeyVaultName
+Specifies the key vault to set the secrets in.
 
 ```yaml
 Type: String
@@ -47,8 +46,8 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Value
-Specifies the name of the cmdlet or command element that is being aliased.
+### -ResourceGroup
+Specifies the resource group the cosmos db account is in.
 
 ```yaml
 Type: String
@@ -62,11 +61,8 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Scope
-Specifies the scope of the new alias.
-Valid values are "Global", "Local", or "Script", or a number relative to the current scope (0 through the number of scopes, where 0 is the current scope and 1 is its parent).
-"Local" is the default.
-For more information, see about_Scopes.
+### -Environment
+Specifies the environment to limit the cosmos db account name on.
 
 ```yaml
 Type: String
@@ -74,8 +70,23 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: Named
-Default value: Global
+Position: 3
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Regex
+Specifies the regex to limit the cosmos db account name on.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 4
+Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```

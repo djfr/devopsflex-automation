@@ -1,7 +1,7 @@
 ---
 external help file: DevOpsFlex.Automation.PowerShell-help.xml
 Module Name: DevOpsFlex.Automation.PowerShell
-online version: 
+online version:
 schema: 2.0.0
 ---
 
@@ -13,7 +13,7 @@ Help method to list all ASM and ARM VNets across all subscriptions that the acco
 ## SYNTAX
 
 ```
-Get-AzureAllVNets
+Get-AzureAllVNets [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -21,7 +21,7 @@ Help method to list all ASM and ARM VNets across all subscriptions that the acco
 
 ## EXAMPLES
 
-### -------------------------- EXAMPLE 1 --------------------------
+### EXAMPLE 1
 ```
 Get-AzureAllVNets | ft *
 ```
@@ -30,6 +30,10 @@ This will show you the list of all ARM and ASM VNets on all subscriptions you ha
 
 ## PARAMETERS
 
+### CommonParameters
+This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable.
+For more information, see about_CommonParameters (http://go.microsoft.com/fwlink/?LinkID=113216).
+
 ## INPUTS
 
 ## OUTPUTS
@@ -37,4 +41,3 @@ This will show you the list of all ARM and ASM VNets on all subscriptions you ha
 ## NOTES
 
 ## RELATED LINKS
-

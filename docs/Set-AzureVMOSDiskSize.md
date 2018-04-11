@@ -1,7 +1,7 @@
 ---
 external help file: DevOpsFlex.Automation.PowerShell-Help.xml
 Module Name: DevOpsFlex.Automation.PowerShell
-online version: 
+online version:
 schema: 2.0.0
 ---
 
@@ -14,6 +14,7 @@ Resizes the operating system VHD on an ASM Azure VM.
 
 ```
 Set-AzureVMOSDiskSize -VM <ServiceOperationContext> [-SizeInGb] <Int32> [-WhatIf] [-Confirm]
+ [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -26,7 +27,7 @@ This meets requirements where a disk was sized up by error and can be safely shr
 ## EXAMPLES
 
 ### Example 1
-```
+```powershell
 PS C:\> {{ Add example code here }}
 ```
 
@@ -40,7 +41,7 @@ The Azure VM object that we want to resize the OS disk on.
 ```yaml
 Type: ServiceOperationContext
 Parameter Sets: (All)
-Aliases: 
+Aliases:
 
 Required: True
 Position: Named
@@ -57,7 +58,7 @@ This can be a smaller value then the current size for use cases where one actual
 ```yaml
 Type: Int32
 Parameter Sets: (All)
-Aliases: 
+Aliases:
 
 Required: True
 Position: 0
@@ -97,6 +98,10 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### CommonParameters
+This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable.
+For more information, see about_CommonParameters (http://go.microsoft.com/fwlink/?LinkID=113216).
+
 ## INPUTS
 
 ## OUTPUTS
@@ -104,4 +109,3 @@ Accept wildcard characters: False
 ## NOTES
 
 ## RELATED LINKS
-

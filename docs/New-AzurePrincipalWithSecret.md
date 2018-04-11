@@ -1,67 +1,51 @@
 ---
-external help file: DevOpsFlex.Automation.PowerShell-Help.xml
+external help file: DevOpsFlex.Automation.PowerShell-help.xml
 Module Name: DevOpsFlex.Automation.PowerShell
-online version: 
+online version:
 schema: 2.0.0
 ---
 
 # New-AzurePrincipalWithSecret
 
 ## SYNOPSIS
-Creates an Azure Service Principal that uses a password to authenticate against the Azure AD.
+Adds AzureRM Active Directory Application and persists secrets to Key Vault for it.
 
 ## SYNTAX
 
 ```
 New-AzurePrincipalWithSecret [-SystemName] <String> [-PrincipalPurpose] <String> [-EnvironmentName] <String>
- [-PrincipalPassword] <String> [[-VaultSubscriptionId] <String>] [-PrincipalName <String>]
+ [-PrincipalPassword] <String> [[-VaultSubscriptionId] <String>] [[-PrincipalName] <String>]
+ [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-Creates an Azure Service Principal that uses a password to authenticate against the Azure AD.
-
-In detail the script will:
-
-Create the Azure AD Application, specifying the password as it's User Assertion method.
-
-Create the Azure Service Principal for the AD Application we just created.
-
-Populate the system keyvault with all the relevant configuration fields so that the system can find and use the service principal, including the password.
+1.
+Creates a new Azure Active Directory Application
+2.
+Creates new secrets in Azure Key Vault for the AAD Application, namely the TenantId, IdentifierUri, ApplicationId and Application Secret
 
 ## EXAMPLES
 
-### Example 1
+### EXAMPLE 1
 ```
-PS C:\> {{ Add example code here }}
+New-AzurePrincipalWithSecret -SystemName 'sys1' `
 ```
 
-{{ Add example description here }}
+-PrincipalPurpose 'Authentication' \`
+                             -EnvironmentName 'test' \`
+                             -PrincipalPassword 'something123$' \`
+                             -VaultSubscriptionId '\[ID HERE\]' \`
+                             -PrincipalName 'test'
 
 ## PARAMETERS
 
 ### -SystemName
-The name of the system that we are creating the service principal for.
+The system the application is for.
 
 ```yaml
 Type: String
 Parameter Sets: (All)
-Aliases: 
-
-Required: True
-Position: 0
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -PrincipalPurpose
-The purpose of the principal to be created.
-Can only be 'Configuration' or 'Authentication'.
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases: 
+Aliases:
 
 Required: True
 Position: 1
@@ -70,13 +54,13 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -EnvironmentName
-The name of the environment that the service principal is going to be used on.
+### -PrincipalPurpose
+The purpose of the principal Authentication or Configuration.
 
 ```yaml
 Type: String
 Parameter Sets: (All)
-Aliases: 
+Aliases:
 
 Required: True
 Position: 2
@@ -85,58 +69,75 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -PrincipalPassword
-The password for the principal that we are creating.
+### -EnvironmentName
+The environment the application is for.
 
 ```yaml
 Type: String
 Parameter Sets: (All)
-Aliases: 
+Aliases:
 
 Required: True
-Position: 4
+Position: 3
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -VaultSubscriptionId
-The GUID identifier of the Azure subscription where the keyvaults are deployed to.
+### -PrincipalPassword
+The password for the principal.
 
 ```yaml
 Type: String
 Parameter Sets: (All)
-Aliases: 
+Aliases:
 
-Required: False
+Required: True
 Position: 5
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -PrincipalName
-The optional principal name to prepend to all the generated naming conventions.
-
-This is mostly to allow people from differentiating principals for the same system/purpose/environment when they need to issue multiple.
+### -VaultSubscriptionId
+The subscription Id that Key Vault is on.
 
 ```yaml
 Type: String
 Parameter Sets: (All)
-Aliases: 
+Aliases:
 
 Required: False
-Position: Named
+Position: 6
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
+
+### -PrincipalName
+The name of the Key Vault principal.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 7
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### CommonParameters
+This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable.
+For more information, see about_CommonParameters (http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## INPUTS
 
 ## OUTPUTS
 
 ## NOTES
+Currently CmdletBinding doesn't have any internal support built-in.
 
 ## RELATED LINKS
-

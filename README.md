@@ -80,3 +80,29 @@ It then uploads the generated pair to keyvault with relevant tags applied.
 
 Kill switch for NSGs in ARM VNets and NICs. <br />
 Dissociates NSGs from VNets, Subnets and Nics in a fast and efficient manner.
+
+#### [Get-EswAadAuthFile](docs/Get-EswAadAuthFile.md)
+
+Gets the contents of the keyvault and maps it to an Azure auth settings file.
+Overrides the current file if it already exists, which is the desired behaviour, since what's on keyvault is the final set of settings.
+
+You need to be loged in azure with 'Login-AzAccount' and you need to have LIST and READ rights on secrets on the target key vault.
+
+#### [Register-AzureCosmosDBInKeyVault](docs/Register-AzureCosmosDBInKeyVault.md)
+
+Scans cosmos db account instances based on the search criteria and sets the key vault secrets to the primary keys.
+
+#### [Register-AzureRedisCacheInKeyVault](docs/Register-AzureRedisCacheInKeyVault.md)
+
+Scans redis cache instances based on the search criteria and sets the key vault secrets to the primary keys.
+
+#### [Register-AzureServiceBusInKeyVault](docs/Register-AzureServiceBusInKeyVault.md)
+
+Scans service bus namespaces for authorization rules and sets the keyvault secret to the connection string.
+
+#### [Register-AzureSqlDatabaseInKeyVault](docs/Register-AzureSqlDatabaseInKeyVault.md)
+
+Scans sql database instances based on the search criteria and sets the key vault secrets to the connection strings.
+
+#### [New-AutoRestProject](docs/New-AutoRestProject.md)
+

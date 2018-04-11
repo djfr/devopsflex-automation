@@ -1,66 +1,41 @@
 ---
-external help file: DevOpsFlex.Automation.PowerShell-help.xml
+external help file: DevOpsFlex.Automation.PowerShell-Help.xml
 Module Name: DevOpsFlex.Automation.PowerShell
 online version:
 schema: 2.0.0
 ---
 
-# Remove-AzurePrincipalWithSecret
+# New-AutoRestProject
 
 ## SYNOPSIS
-Removes the Azure Active Directory Application, Principal and any secrets stored for it.
+generates, builds and packs c# client side code for given JSON Swagger URL
 
 ## SYNTAX
 
 ```
-Remove-AzurePrincipalWithSecret [[-ADApplicationId] <String>] [[-ADApplication] <Object>]
- [-VaultSubscriptionId] <String> [<CommonParameters>]
+New-AutoRestProject [-DefUrl] <String> [-Namespace] <String> [[-OutputFolder] <String>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-Removes the Azure Active Directory Application, Principal and any secrets stored for it.
+generate, build and pack nuget package for given JSON Swagger input
+
+Currently supports:
+
+win10-x64
 
 ## EXAMPLES
 
-### EXAMPLE 1
+### Example 1
+```powershell
+PS C:\> {{ Add example code here }}
 ```
-Remove-AzurePrincipalWithSecret -ADApplicationId '[ID HERE]' -VaultSubscriptionId '[ID HERE]'
-```
+
+{{ Add example description here }}
 
 ## PARAMETERS
 
-### -ADApplicationId
-The Id of the Azure Active Directory Application you with to remove.
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 1
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -ADApplication
-The Azure Active Directory Application you with to remove.
-
-```yaml
-Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 2
-Default value: None
-Accept pipeline input: True (ByPropertyName, ByValue)
-Accept wildcard characters: False
-```
-
-### -VaultSubscriptionId
-The subscription Id that Key Vault is on.
+### -DefUrl
+URL for the Swagger definition JSON file
 
 ```yaml
 Type: String
@@ -68,6 +43,36 @@ Parameter Sets: (All)
 Aliases:
 
 Required: True
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Namespace
+Namespace to put generated code into
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 2
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -OutputFolder
+Output folder
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
 Position: 3
 Default value: None
 Accept pipeline input: False
@@ -83,6 +88,5 @@ For more information, see about_CommonParameters (http://go.microsoft.com/fwlink
 ## OUTPUTS
 
 ## NOTES
-Currently CmdletBinding doesn't have any internal support built-in.
 
 ## RELATED LINKS

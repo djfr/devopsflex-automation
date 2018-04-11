@@ -1,7 +1,7 @@
 ---
 external help file: DevOpsFlex.Automation.PowerShell-Help.xml
 Module Name: DevOpsFlex.Automation.PowerShell
-online version: 
+online version:
 schema: 2.0.0
 ---
 
@@ -13,7 +13,7 @@ Gets the current user (from Get-AzureRmContext) AD object ID.
 ## SYNTAX
 
 ```
-Get-MyUserObjectId
+Get-MyUserObjectId [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -24,13 +24,17 @@ This ObjectId is the baseline for any function that adds AAD principals or users
 ## EXAMPLES
 
 ### Example 1
-```
+```powershell
 PS C:\> {{ Add example code here }}
 ```
 
 {{ Add example description here }}
 
 ## PARAMETERS
+
+### CommonParameters
+This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable.
+For more information, see about_CommonParameters (http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## INPUTS
 
@@ -39,4 +43,3 @@ PS C:\> {{ Add example code here }}
 ## NOTES
 
 ## RELATED LINKS
-

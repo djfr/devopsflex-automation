@@ -1,98 +1,88 @@
 ---
-external help file: DevOpsFlex.Automation.PowerShell-Help.xml
+external help file: DevOpsFlex.Automation.PowerShell-help.xml
 Module Name: DevOpsFlex.Automation.PowerShell
-online version: 
+online version:
 schema: 2.0.0
 ---
 
 # Remove-AzurePrincipalWithCert
 
 ## SYNOPSIS
-Removes an Azure Service Principal that uses an x509 certificate to authenticate against the Azure AD.
+Removes the Azure Active Directory Application, Principal and the cert stored for it.
 
 ## SYNTAX
 
 ```
-Remove-AzurePrincipalWithCert [[-ADApplicationId] <String>] [[-ADApplication] <Application>]
- [[-VaultSubscriptionId] <String>]
+Remove-AzurePrincipalWithCert [[-ADApplicationId] <String>] [[-ADApplication] <Object>]
+ [[-VaultSubscriptionId] <String>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-Removes an Azure Service Principal that uses an x509 certificate to authenticate against the Azure AD.
-
-In detail the script will:
-
-Remove the encoded 64bit Cert string from keyvault.
-
-Remove all the relevant configuration fields from the system keyvault.
-
-Remove the Cert password from the specific passwords keyvault.
-
-Remove the Azure Service Principal for the AD Application.
-
-Remove the Azure AD Application.
+Removes the Azure Active Directory Application, Principal and the cert stored for it.
 
 ## EXAMPLES
 
-### Example 1
+### EXAMPLE 1
 ```
-PS C:\> {{ Add example code here }}
+Remove-AzurePrincipalWithCert -ADApplicationId '[ID HERE]' -VaultSubscriptionId '[ID HERE]'
 ```
-
-{{ Add example description here }}
 
 ## PARAMETERS
 
 ### -ADApplicationId
-The ID GUID for the AD Application that we want removed.
+The Id of the Azure Active Directory Application you with to remove.
 
 ```yaml
 Type: String
 Parameter Sets: (All)
-Aliases: 
+Aliases:
 
 Required: False
-Position: 0
+Position: 1
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
 ### -ADApplication
-The AD Application that we want removed.
+The Azure Active Directory Application you with to remove.
 
 ```yaml
-Type: Application
+Type: Object
 Parameter Sets: (All)
-Aliases: 
+Aliases:
 
 Required: False
-Position: 1
+Position: 2
 Default value: None
 Accept pipeline input: True (ByPropertyName, ByValue)
 Accept wildcard characters: False
 ```
 
 ### -VaultSubscriptionId
-The GUID identifier of the Azure subscription where the keyvaults are deployed to.
+The subscription Id that Key Vault is on.
 
 ```yaml
 Type: String
 Parameter Sets: (All)
-Aliases: 
+Aliases:
 
 Required: False
-Position: 2
+Position: 3
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
+
+### CommonParameters
+This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable.
+For more information, see about_CommonParameters (http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## INPUTS
 
 ## OUTPUTS
 
 ## NOTES
+Currently CmdletBinding doesn't have any internal support built-in.
 
 ## RELATED LINKS
-
