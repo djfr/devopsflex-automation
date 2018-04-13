@@ -18,7 +18,7 @@ Export-ModuleMember -Function @(
     # AzureKeyvaultHelpers
     'Add-MeToKeyvault'
     'Add-UserToKeyVault'
-    'Get-EswAadAuthFile'
+    'Get-AadAuthFile'
     'New-SWRandomPassword'
     'New-UserInKeyVault'
 

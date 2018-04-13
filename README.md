@@ -81,7 +81,7 @@ It then uploads the generated pair to keyvault with relevant tags applied.
 Kill switch for NSGs in ARM VNets and NICs. <br />
 Dissociates NSGs from VNets, Subnets and Nics in a fast and efficient manner.
 
-#### [Get-EswAadAuthFile](docs/Get-EswAadAuthFile.md)
+#### [Get-AadAuthFile](docs/Get-AadAuthFile.md)
 
 Gets the contents of the keyvault and maps it to an Azure auth settings file.
 Overrides the current file if it already exists, which is the desired behaviour, since what's on keyvault is the final set of settings.

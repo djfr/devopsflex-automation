@@ -5,7 +5,7 @@ online version:
 schema: 2.0.0
 ---
 
-# Get-EswAadAuthFile
+# Get-AadAuthFile
 
 ## SYNOPSIS
 Gets the contents of the keyvault and maps it to an Azure auth settings file.
@@ -13,7 +13,7 @@ Gets the contents of the keyvault and maps it to an Azure auth settings file.
 ## SYNTAX
 
 ```
-Get-EswAadAuthFile [-KeyvaultName] <String> [-FileLocation <String>] [-FileName <String>] [<CommonParameters>]
+Get-AadAuthFile [-KeyvaultName] <String> [-FileLocation <String>] [-FileName <String>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -26,14 +26,14 @@ You need to be loged in azure with 'Login-AzAccount' and you need to have LIST a
 
 ### EXAMPLE 1
 ```
-Get-EswAadAuthFile -KeyvaultName 'my-kv'
+Get-AadAuthFile -KeyvaultName 'my-kv'
 ```
 
 Maps the contents of the 'my-kv' keyvault to the file '%LOCALAPPDATA%\Eshopworld\developer.azureauth'.
 
 ### EXAMPLE 2
 ```
-Get-EswAadAuthFile -KeyvaultName 'my-kv' -FileLocation 'C:\MyFolder' -FileName 'myfile.azureauth'
+Get-AadAuthFile -KeyvaultName 'my-kv' -FileLocation 'C:\MyFolder' -FileName 'myfile.azureauth'
 ```
 
 Maps the contents of the 'my-kv' keyvault to the file 'C:\MyFolder\myfile.azureauth'.

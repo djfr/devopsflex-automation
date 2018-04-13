@@ -263,7 +263,7 @@ function New-UserInKeyVault
     Write-Output -InputObject $password
 }
 
-function Get-EswAadAuthFile
+function Get-AadAuthFile
 {
 <#
 .Synopsis
@@ -287,11 +287,11 @@ The name of the file.
 Defaults to developer.azureauth
 
 .EXAMPLE
-Get-EswAadAuthFile -KeyvaultName 'my-kv'
+Get-AadAuthFile -KeyvaultName 'my-kv'
 Maps the contents of the 'my-kv' keyvault to the file '%LOCALAPPDATA%\Eshopworld\developer.azureauth'.
 
 .EXAMPLE
-Get-EswAadAuthFile -KeyvaultName 'my-kv' -FileLocation 'C:\MyFolder' -FileName 'myfile.azureauth'
+Get-AadAuthFile -KeyvaultName 'my-kv' -FileLocation 'C:\MyFolder' -FileName 'myfile.azureauth'
 Maps the contents of the 'my-kv' keyvault to the file 'C:\MyFolder\myfile.azureauth'.
 #>
 
