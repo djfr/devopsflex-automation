@@ -27,6 +27,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="FabricEndpoints.ps1" />
     <Compile Include="AutorestCreateProject.ps1" />
     <Compile Include="AzureSQLHelpers.ps1" />
     <Compile Include="AzureKeyvaultHelpers.ps1" />
