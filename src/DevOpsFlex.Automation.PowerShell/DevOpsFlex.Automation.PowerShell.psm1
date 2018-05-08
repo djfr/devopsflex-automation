@@ -8,7 +8,7 @@
 . "$PSScriptRoot\AzureSQLHelpers.ps1"
 . "$PSScriptRoot\AzureServicesInKeyVault.ps1"
 . "$PSScriptRoot\AzureVNetHelpers.ps1"
-. "$PSScriptRoot\FabricEndpoint.ps1"
+. "$PSScriptRoot\FabricEndpoints.ps1"
 . "$PSScriptRoot\ResizeASMDisk.ps1"
 
 # Export functions
@@ -52,7 +52,7 @@ Export-ModuleMember -Function @(
     'Disconnect-AzureEswNetworkSecurityGroups'
     'Get-AzureAllVNets'
 
-    # FabricEndpoint
+    # FabricEndpoints
     'New-FabricEndPoint'
 
     # ResizeASMDisk

@@ -14,7 +14,7 @@
         [int] $Port,
 
         [parameter(Mandatory=$false)]
-        [int] $ProbePath = "/Probe",
+        [string] $ProbePath = "/Probe",
 
         [switch] $UseSsl
     )
@@ -32,8 +32,10 @@
     }
 
     $lbs | % {
-        # Find the Configuration
-        $_ -match '\w*-\w*-\w*-(\w*)-\w*-\w*' > $null
+        Write-Host "LB: $($_.Name)"
+
+        # Find the Configuration / DNS record settings
+        $_.Name -match '\w*-(\w*)-\w*-(\w*)-\w*-\w*' > $null
         $region = $Matches[1]
         $configuration = $Matches[2]
 
@@ -51,25 +53,42 @@
             $dnsName = "$Name"
         }
 
-        # FIND PUBLIC IP ADDRESS OF THE LOAD BALANCER
+        # Find the public IP address of the load balancer
+        $pipRes = Get-AzureRmResource -ResourceId ($_.FrontendIpConfigurations[0].PublicIpAddress.Id)
+
+        Write-Host "$pipRes"
+
+        $pip = (Get-AzureRmPublicIpAddress -Name $pipRes.ResourceName -ResourceGroupName $pipRes.ResourceGroupName).IpAddress
+
+        Write-Host "DNS: $dnsName"
+        Write-Host "Region: $region"
+        Write-Host "Configuration: $configuration"
+        Write-Host "PIP: $pip"
 
         New-AzureRmDnsRecordSet -Name "$dnsName" `
                                 -RecordType A `
                                 -ZoneName "$configuration.eshopworld.$dnsSuffix" `
                                 -ResourceGroupName "global-platform-$configuration" `
                                 -Ttl 360 `
-                                -DnsRecords (New-AzureRmDnsRecordConfig -IPv4Address "1.2.3.4")
+                                -DnsRecords (New-AzureRmDnsRecordConfig -IPv4Address "$pip")
 
-        Set-AzureRmLoadBalancerProbeConfig -Name "$Name-probe" `
-                                           -LoadBalancer $_ `
-                                           -Protocol Http `
-                                           -Port 80 `
-                                           -RequestPath $ProbePath `
-                                           -IntervalInSeconds 360 `
-                                           -ProbeCount 2
+        $probeName = "$Name-probe"
+        $_ | Add-AzureRmLoadBalancerProbeConfig -Name "$probeName" `
+                                                -Protocol Http `
+                                                -Port 80 `
+                                                -RequestPath $ProbePath `
+                                                -IntervalInSeconds 360 `
+                                                -ProbeCount 2
+        $_ | Set-AzureRmLoadBalancer
 
-        Set-AzureRmLoadBalancerRuleConfig -Name "$Name" -Protocol Http `
-  -Probe $probe -FrontendPort 80 -BackendPort 80 `
-  -FrontendIpConfiguration $feip -BackendAddressPool $bePool
+        $probeId = ((Get-AzureRmLoadBalancer -Name $_.Name -ResourceGroupName $_.ResourceGroupName).Probes | ? { $_.Name -match "$Name-probe"})[0].Id
+        $_ | Add-AzureRmLoadBalancerRuleConfig -Name "$Name" `
+                                               -Protocol Http `
+                                               -ProbeId $probeId `
+                                               -FrontendPort $Port `
+                                               -BackendPort $Port `
+                                               -FrontendIpConfigurationId $_.FrontendIpConfigurations[0].Id `
+                                               -BackendAddressPoolId $_.BackendAddressPools[0].Id
+        $_ | Set-AzureRmLoadBalancer
     }
 }
