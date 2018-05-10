@@ -12,7 +12,9 @@
         [parameter(Mandatory=$false)]
         [string] $ProbePath = "/Probe",
 
-        [switch] $UseSsl
+        [switch] $UseSsl,
+
+        [switch] $Force
     )
 
     if($UseSsl.IsPresent) {
@@ -51,7 +53,7 @@
                                 -ZoneName "$configuration.eshopworld.$dnsSuffix" `
                                 -ResourceGroupName "global-platform-$configuration" `
                                 -Ttl 360 `
-                                -DnsRecords (New-AzureRmDnsRecordConfig -IPv4Address "$pip")
+                                -DnsRecords (New-AzureRmDnsRecordConfig -IPv4Address "$pip") > $null
 
         $probeName = "$Name-probe"
         $_ | Add-AzureRmLoadBalancerProbeConfig -Name "$probeName" `
@@ -59,17 +61,17 @@
                                                 -Port $Port `
                                                 -RequestPath $ProbePath `
                                                 -IntervalInSeconds 360 `
-                                                -ProbeCount 2
-        $_ | Set-AzureRmLoadBalancer
+                                                -ProbeCount 2 > $null
+        $_ | Set-AzureRmLoadBalancer > $null
 
         $probeId = ((Get-AzureRmLoadBalancer -Name $_.Name -ResourceGroupName $_.ResourceGroupName).Probes | ? { $_.Name -match "$Name-probe"})[0].Id
         $_ | Add-AzureRmLoadBalancerRuleConfig -Name "$Name" `
-                                               -Protocol Http `
+                                               -Protocol Tcp `
                                                -ProbeId $probeId `
                                                -FrontendPort $Port `
                                                -BackendPort $Port `
                                                -FrontendIpConfigurationId $_.FrontendIpConfigurations[0].Id `
-                                               -BackendAddressPoolId $_.BackendAddressPools[0].Id
-        $_ | Set-AzureRmLoadBalancer
+                                               -BackendAddressPoolId $_.BackendAddressPools[0].Id > $null
+        $_ | Set-AzureRmLoadBalancer > $null
     }
 }
