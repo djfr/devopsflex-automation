@@ -4,10 +4,6 @@
     param
     (
         [parameter(Mandatory=$true, Position=0)]
-        [ValidateSet('default', 'checkout', 'logistics', 'payments')]
-        [string] $Component,
-
-        [parameter(Mandatory=$true, Position=0)]
         [string] $Name,
 
         [parameter(Mandatory=$true, Position=1)]
@@ -19,21 +15,14 @@
         [switch] $UseSsl
     )
 
-
-
-    # Find the load balancer(s)
-    $lbs = Get-AzureRmLoadBalancer | ? { $_.Name.ToLower() -match $Component }
-
     if($UseSsl.IsPresent) {
-        $lbs = $lbs | ? { $_.Name -match '-ilb' }
+        $lbs = Get-AzureRmLoadBalancer | ? { $_.Name.ToLower() -match '-ilb' }
     }
     else {
-        $lbs = $lbs | ? { $_.Name -match '-lb' }
+        $lbs = Get-AzureRmLoadBalancer | ? { $_.Name.ToLower() -match '-lb' }
     }
 
     $lbs | % {
-        Write-Host "LB: $($_.Name)"
-
         # Find the Configuration / DNS record settings
         $_.Name -match '\w*-(\w*)-\w*-(\w*)-\w*-\w*' > $null
         $region = $Matches[1]
@@ -55,15 +44,7 @@
 
         # Find the public IP address of the load balancer
         $pipRes = Get-AzureRmResource -ResourceId ($_.FrontendIpConfigurations[0].PublicIpAddress.Id)
-
-        Write-Host "$pipRes"
-
         $pip = (Get-AzureRmPublicIpAddress -Name $pipRes.ResourceName -ResourceGroupName $pipRes.ResourceGroupName).IpAddress
-
-        Write-Host "DNS: $dnsName"
-        Write-Host "Region: $region"
-        Write-Host "Configuration: $configuration"
-        Write-Host "PIP: $pip"
 
         New-AzureRmDnsRecordSet -Name "$dnsName" `
                                 -RecordType A `
@@ -75,7 +56,7 @@
         $probeName = "$Name-probe"
         $_ | Add-AzureRmLoadBalancerProbeConfig -Name "$probeName" `
                                                 -Protocol Http `
-                                                -Port 80 `
+                                                -Port $Port `
                                                 -RequestPath $ProbePath `
                                                 -IntervalInSeconds 360 `
                                                 -ProbeCount 2
