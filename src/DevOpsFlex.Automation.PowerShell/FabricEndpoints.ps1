@@ -33,7 +33,7 @@
         $region = $Matches[1]
         $configuration = $Matches[2]
 
-        if($configuration -eq 'prod') {
+        if($configuration -eq 'prod' -or $configuration -eq 'sand') {
             $dnsSuffix = 'com'
         }
         else {
@@ -59,8 +59,7 @@
                                 -Ttl 360 `
                                 -DnsRecords (New-AzureRmDnsRecordConfig -IPv4Address "$pip") > $null
 
-        $probeName = "$Name-probe"
-        $_ | Add-AzureRmLoadBalancerProbeConfig -Name "$probeName" `
+        $_ | Add-AzureRmLoadBalancerProbeConfig -Name "$Name" `
                                                 -Protocol Http `
                                                 -Port $Port `
                                                 -RequestPath $ProbePath `
@@ -68,7 +67,7 @@
                                                 -ProbeCount 2 > $null
         $_ | Set-AzureRmLoadBalancer > $null
 
-        $probeId = ((Get-AzureRmLoadBalancer -Name $_.Name -ResourceGroupName $_.ResourceGroupName).Probes | ? { $_.Name -match "$Name-probe"})[0].Id
+        $probeId = ((Get-AzureRmLoadBalancer -Name $_.Name -ResourceGroupName $_.ResourceGroupName).Probes | ? { $_.Name -match $Name})[0].Id
         $_ | Add-AzureRmLoadBalancerRuleConfig -Name "$Name" `
                                                -Protocol Tcp `
                                                -ProbeId $probeId `
@@ -89,7 +88,7 @@
             $region = $Matches[1]
             $configuration = $Matches[2]
 
-            if($configuration -eq 'prod') {
+            if($configuration -eq 'prod' -or $configuration -eq 'sand') {
                 $dnsSuffix = 'com'
             }
             else {
@@ -115,14 +114,36 @@
                                     -Ttl 360 `
                                     -DnsRecords (New-AzureRmDnsRecordConfig -IPv4Address "$pip") > $null
 
-            $probeName = "$Name-probe"
-            $_ | Add-AzureRmApplicationGatewayProbeConfig -Name $probeName `
+            $_ | Add-AzureRmApplicationGatewayProbeConfig -Name "$Name" `
                                                           -Protocol Http `
                                                           -HostName "$dnsName-ilb" `
-                                                          -Path "/Probe" `
+                                                          -Path "$ProbePath" `
                                                           -Interval 30 `
                                                           -Timeout 120 `
                                                           -UnhealthyThreshold 2
+            $_ | Set-AzureRmApplicationGateway
+
+            $_ | Add-AzureRmApplicationGatewayHttpListener -Name "$Name" `
+                                                           -Protocol "Https" `
+                                                           -SslCertificateId ($foo.SslCertificates | ? { $_.Name -match "star.eshopworld.net" })[0].Id `
+                                                           -FrontendIPConfigurationId $foo.FrontendIPConfigurations[0].Id `
+                                                           -FrontendPort 443 `
+                                                           -HostName "$dnsName.$configuration.eshopworld.$dnsSuffix"
+            $_ | Set-AzureRmApplicationGateway
+
+            $probeId = ((Get-AzureRmApplicationGateway -Name $_.Name -ResourceGroupName $_.ResourceGroupName).Probes | ? { $_.Name -match $Name})[0].Id
+            $_ | Add-AzureRmApplicationGatewayBackendHttpSettings -Name "$Name" `
+                                                                  -Port $Port `
+                                                                  -Protocol "HTTP" `
+                                                                  -ProbeId $probeId `
+                                                                  -CookieBasedAffinity "Disabled"
+            $appGateway = $_ | Set-AzureRmApplicationGateway
+
+            $_ | Add-AzureApplicationGatewayRequestRoutingRule -Name $Name `
+                                                               -RuleType Basic `
+                                                               -BackendHttpSettingsId ($appGateway.BackendHttpSettingsCollection | ? { $_.Name -match $Name })[0].Id `
+                                                               -HttpListenerId ($appGateway.HttpListeners | ? { $_.Name -match $Name })[0].Id `
+                                                               -BackendAddressPool ($appGateway.BackendAddressPools)[0].Id
             $_ | Set-AzureRmApplicationGateway
         }
     }
