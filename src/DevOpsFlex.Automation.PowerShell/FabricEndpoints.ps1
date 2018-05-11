@@ -133,11 +133,14 @@
                                                           -UnhealthyThreshold 2
             $_ | Set-AzureRmApplicationGateway
 
+            $foo = (($_.FrontendPorts | ? { $_.Port -eq 443 })[0].Id)
+            Write-Host "Port ID: $foo"
+
             $_ | Add-AzureRmApplicationGatewayHttpListener -Name "$Name" `
                                                            -Protocol "Https" `
                                                            -SslCertificateId ($foo.SslCertificates | ? { $_.Name -match "star.eshopworld.net" })[0].Id `
                                                            -FrontendIPConfigurationId $foo.FrontendIPConfigurations[0].Id `
-                                                           -FrontendPort ($_.FrontendPorts | ? { $_.Port -eq 443 })[0].Id `
+                                                           -FrontendPortId (($_.FrontendPorts | ? { $_.Port -eq 443 })[0].Id) `
                                                            -HostName "$dnsName.$configuration.eshopworld.$dnsSuffix"
             $_ | Set-AzureRmApplicationGateway
 
@@ -149,7 +152,7 @@
                                                                   -CookieBasedAffinity "Disabled"
             $_ | Set-AzureRmApplicationGateway
             
-            $appGateway = Get-AzureRmApplicationGateway -Name $_.Name -ResourceGroupName $_.ResourceGroupName
+            $appGateway = Get-AzureRmApplicationGateway -Name $_.Name -ResourceGroupName $_.ResourceGroupName # Update so we get IDs for everything we just created
             $_ | Add-AzureApplicationGatewayRequestRoutingRule -Name $Name `
                                                                -RuleType Basic `
                                                                -BackendHttpSettingsId ($appGateway.BackendHttpSettingsCollection | ? { $_.Name -match $Name })[0].Id `
