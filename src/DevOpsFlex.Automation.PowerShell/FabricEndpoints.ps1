@@ -88,10 +88,10 @@
     if($UseSsl.IsPresent) {
         $appGateways = Get-AzureRmApplicationGateway
 
-        $appGateways | % {
+        foreach($ag in $appGateways) {
 
             ### MOVE THIS INTO IT'S OWN THING
-            $_.Name -match '\w*-(\w*)-\w*-(\w*)-\w*' > $null
+            $ag.Name -match '\w*-(\w*)-\w*-(\w*)-\w*' > $null
             $region = $Matches[1]
             $configuration = $Matches[2]
 
@@ -114,7 +114,7 @@
             # $ag | Add-AzureRmApplicationGatewayFrontendPort -Name https-port -Port 443 | Set-AzureRmApplicationGateway
 
             # Find the public IP address of the app gateway
-            $pipRes = Get-AzureRmResource -ResourceId ($_.FrontendIPConfigurations[0].PublicIPAddress.Id)
+            $pipRes = Get-AzureRmResource -ResourceId ($ag.FrontendIPConfigurations[0].PublicIPAddress.Id)
             $pip = (Get-AzureRmPublicIpAddress -Name $pipRes.ResourceName -ResourceGroupName $pipRes.ResourceGroupName).IpAddress
 
             New-AzureRmDnsRecordSet -Name "$dnsName" `
@@ -124,42 +124,40 @@
                                     -Ttl 360 `
                                     -DnsRecords (New-AzureRmDnsRecordConfig -IPv4Address "$pip") > $null
 
-            $_ | Add-AzureRmApplicationGatewayProbeConfig -Name "$Name" `
-                                                          -Protocol Http `
-                                                          -HostName "$dnsName-ilb" `
-                                                          -Path "$ProbePath" `
-                                                          -Interval 30 `
-                                                          -Timeout 120 `
-                                                          -UnhealthyThreshold 2
-            $_ | Set-AzureRmApplicationGateway
+            $ag | Add-AzureRmApplicationGatewayProbeConfig -Name "$Name" `
+                                                           -Protocol Http `
+                                                           -HostName "$dnsName-ilb" `
+                                                           -Path "$ProbePath" `
+                                                           -Interval 30 `
+                                                           -Timeout 120 `
+                                                           -UnhealthyThreshold 2
+            $ag | Set-AzureRmApplicationGateway
+            $agRefresh = Get-AzureRmApplicationGateway -Name $ag.Name -ResourceGroupName $ag.ResourceGroupName
 
-            $foo = (($_.FrontendPorts | ? { $_.Port -eq 443 })[0].Id)
-            Write-Host "Port ID: $foo"
+            $agRefresh | Add-AzureRmApplicationGatewayHttpListener -Name "$Name" `
+                                                                   -Protocol "Https" `
+                                                                   -SslCertificate ($agRefresh.SslCertificates | ? { $_.Name -match "star.eshopworld.net" })[0] `
+                                                                   -FrontendIPConfiguration ($agRefresh.FrontendIPConfigurations)[0] `
+                                                                   -FrontendPort ($agRefresh.FrontendPorts | ? { $_.Port -eq 443 })[0] `
+                                                                   -HostName "$dnsName.$configuration.eshopworld.$dnsSuffix"
+            $agRefresh | Set-AzureRmApplicationGateway
+            $agRefresh = Get-AzureRmApplicationGateway -Name $ag.Name -ResourceGroupName $ag.ResourceGroupName
 
-            $_ | Add-AzureRmApplicationGatewayHttpListener -Name "$Name" `
-                                                           -Protocol "Https" `
-                                                           -SslCertificateId ($foo.SslCertificates | ? { $_.Name -match "star.eshopworld.net" })[0].Id `
-                                                           -FrontendIPConfigurationId $foo.FrontendIPConfigurations[0].Id `
-                                                           -FrontendPortId (($_.FrontendPorts | ? { $_.Port -eq 443 })[0].Id) `
-                                                           -HostName "$dnsName.$configuration.eshopworld.$dnsSuffix"
-            $_ | Set-AzureRmApplicationGateway
+            $agRefresh | Add-AzureRmApplicationGatewayBackendHttpSettings -Name "$Name" `
+                                                                          -Port $Port `
+                                                                          -Protocol "HTTP" `
+                                                                          -Probe ($agRefresh.Probes | ? { $_.Name -match $Name})[0] `
+                                                                          -CookieBasedAffinity "Disabled"
+            $agRefresh | Set-AzureRmApplicationGateway
+            $agRefresh = Get-AzureRmApplicationGateway -Name $ag.Name -ResourceGroupName $ag.ResourceGroupName
 
-            $probeId = ((Get-AzureRmApplicationGateway -Name $_.Name -ResourceGroupName $_.ResourceGroupName).Probes | ? { $_.Name -match $Name})[0].Id
-            $_ | Add-AzureRmApplicationGatewayBackendHttpSettings -Name "$Name" `
-                                                                  -Port $Port `
-                                                                  -Protocol "HTTP" `
-                                                                  -ProbeId $probeId `
-                                                                  -CookieBasedAffinity "Disabled"
-            $_ | Set-AzureRmApplicationGateway
-            
-            $appGateway = Get-AzureRmApplicationGateway -Name $_.Name -ResourceGroupName $_.ResourceGroupName # Update so we get IDs for everything we just created
-            $_ | Add-AzureApplicationGatewayRequestRoutingRule -Name $Name `
-                                                               -RuleType Basic `
-                                                               -BackendHttpSettingsId ($appGateway.BackendHttpSettingsCollection | ? { $_.Name -match $Name })[0].Id `
-                                                               -HttpListenerId ($appGateway.HttpListeners | ? { $_.Name -match $Name })[0].Id `
-                                                               -BackendAddressPool ($appGateway.BackendAddressPools)[0].Id
-            $_ | Set-AzureRmApplicationGateway
-
+            $agRefresh = Get-AzureRmApplicationGateway -Name $ag.Name -ResourceGroupName $ag.ResourceGroupName
+            $agRefresh | Add-AzureRmApplicationGatewayRequestRoutingRule -Name $Name `
+                                                                         -RuleType Basic `
+                                                                         -BackendHttpSettings ($agRefresh.BackendHttpSettingsCollection | ? { $_.Name -match $Name })[0] `
+                                                                         -HttpListener ($agRefresh.HttpListeners | ? { $_.Name -match $Name })[0] `
+                                                                         -BackendAddressPool ($agRefresh.BackendAddressPools)[0]
+            $agRefresh | Set-AzureRmApplicationGateway
         }
 
         Write-Host 'Done with LBs'
