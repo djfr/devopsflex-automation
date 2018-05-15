@@ -1,4 +1,5 @@
 # Import functions
+. "$PSScriptRoot\AutorestCreateProject.ps1"
 . "$PSScriptRoot\AzureADHelpers.ps1"
 . "$PSScriptRoot\AzureKeyvaultHelpers.ps1"
 . "$PSScriptRoot\AzurePrincipalWithCert.ps1"
@@ -7,11 +8,14 @@
 . "$PSScriptRoot\AzureSQLHelpers.ps1"
 . "$PSScriptRoot\AzureServicesInKeyVault.ps1"
 . "$PSScriptRoot\AzureVNetHelpers.ps1"
+. "$PSScriptRoot\FabricEndpoints.ps1"
 . "$PSScriptRoot\ResizeASMDisk.ps1"
-. "$PSScriptRoot\AutorestCreateProject.ps1"
 
 # Export functions
 Export-ModuleMember -Function @(
+    # AutorestCreateProject
+    'New-AutoRestProject'
+
     # AzureADHelpers
     'Get-MyUserObjectId'
 
@@ -48,9 +52,9 @@ Export-ModuleMember -Function @(
     'Disconnect-AzureEswNetworkSecurityGroups'
     'Get-AzureAllVNets'
 
+    # FabricEndpoints
+    'New-FabricEndPoint'
+
     # ResizeASMDisk
     'Set-AzureVMOSDiskSize'
-
-    #AutorestCreateProject
-    'New-AutoRestProject'
 )
