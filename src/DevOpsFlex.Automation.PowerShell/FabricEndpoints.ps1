@@ -159,7 +159,7 @@
             $agRefresh | Set-AzureRmApplicationGateway
         }
 
-        Write-Host 'Done with LBs'
+        Write-Host 'Done with AGs'
     }
 
     Write-Host 'Done with everything'
