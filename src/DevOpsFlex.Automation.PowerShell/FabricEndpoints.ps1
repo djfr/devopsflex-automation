@@ -27,6 +27,7 @@
     }
 
     foreach($lb in $lbs) {
+
         ### MOVE THIS INTO IT'S OWN THING
         # Find the Configuration / DNS record settings
         $lb.Name -match '\w*-(\w*)-\w*-(\w*)-\w*-\w*' > $null
@@ -110,8 +111,11 @@
             }
             ###
 
-            ### MISSING THE PORT CHECK -> ADD THIS AFTER THIS THING ACTUALLY WORKS!
-            # $ag | Add-AzureRmApplicationGatewayFrontendPort -Name https-port -Port 443 | Set-AzureRmApplicationGateway
+            if(($ag.FrontendPorts | ? { $_.Port -eq 443 }).Count -eq 0) {
+                $ag | Add-AzureRmApplicationGatewayFrontendPort -Name 'https-port' -Port 443
+            }
+
+            $agRefresh = Get-AzureRmApplicationGateway -Name $ag.Name -ResourceGroupName $ag.ResourceGroupName
 
             # Find the public IP address of the app gateway
             $pipRes = Get-AzureRmResource -ResourceId ($ag.FrontendIPConfigurations[0].PublicIPAddress.Id)
@@ -124,14 +128,14 @@
                                     -Ttl 360 `
                                     -DnsRecords (New-AzureRmDnsRecordConfig -IPv4Address "$pip") > $null
 
-            $ag | Add-AzureRmApplicationGatewayProbeConfig -Name "$Name" `
+            $agRefresh | Add-AzureRmApplicationGatewayProbeConfig -Name "$Name" `
                                                            -Protocol Http `
                                                            -HostName "$dnsName-ilb" `
                                                            -Path "$ProbePath" `
                                                            -Interval 30 `
                                                            -Timeout 120 `
                                                            -UnhealthyThreshold 2 > $null
-            $ag | Set-AzureRmApplicationGateway > $null
+            $agRefresh | Set-AzureRmApplicationGateway > $null
             $agRefresh = Get-AzureRmApplicationGateway -Name $ag.Name -ResourceGroupName $ag.ResourceGroupName
 
             $agRefresh | Add-AzureRmApplicationGatewayHttpListener -Name "$Name" `
