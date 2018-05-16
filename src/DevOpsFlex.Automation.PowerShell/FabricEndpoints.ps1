@@ -58,12 +58,26 @@
             $pip = (Get-AzureRmPublicIpAddress -Name $pipRes.ResourceName -ResourceGroupName $pipRes.ResourceGroupName).IpAddress
         }
 
-        New-AzureRmDnsRecordSet -Name "$dnsName" `
-                                -RecordType A `
-                                -ZoneName "$configuration.eshopworld.$dnsSuffix" `
-                                -ResourceGroupName "global-platform-$configuration" `
-                                -Ttl 360 `
-                                -DnsRecords (New-AzureRmDnsRecordConfig -IPv4Address "$pip") > $null
+
+
+        $existingDns = Get-AzureRmDnsRecordSet -Name "$dnsName" `
+                                                -RecordType A `
+                                                -ZoneName "$configuration.eshopworld.$dnsSuffix" `
+                                                -ResourceGroupName "global-platform-$configuration"
+
+        if(($existingDns -ne $null) -and $Force.IsPresent) {
+            $existingDns | Remove-AzureRmDnsRecordSet -Confirm:$False -Overwrite
+            $existingDns = $null
+        }
+
+        if($existingDns -eq $null) {
+            New-AzureRmDnsRecordSet -Name "$dnsName" `
+                                    -RecordType A `
+                                    -ZoneName "$configuration.eshopworld.$dnsSuffix" `
+                                    -ResourceGroupName "global-platform-$configuration" `
+                                    -Ttl 360 `
+                                    -DnsRecords (New-AzureRmDnsRecordConfig -IPv4Address "$pip") > $null
+        }
 
         $lb | Add-AzureRmLoadBalancerProbeConfig -Name "$Name" `
                                                 -Protocol Http `
@@ -121,12 +135,24 @@
             $pipRes = Get-AzureRmResource -ResourceId ($ag.FrontendIPConfigurations[0].PublicIPAddress.Id)
             $pip = (Get-AzureRmPublicIpAddress -Name $pipRes.ResourceName -ResourceGroupName $pipRes.ResourceGroupName).IpAddress
 
-            New-AzureRmDnsRecordSet -Name "$dnsName" `
-                                    -RecordType A `
-                                    -ZoneName "$configuration.eshopworld.$dnsSuffix" `
-                                    -ResourceGroupName "global-platform-$configuration" `
-                                    -Ttl 360 `
-                                    -DnsRecords (New-AzureRmDnsRecordConfig -IPv4Address "$pip") > $null
+            $existingDns = Get-AzureRmDnsRecordSet -Name "$dnsName" `
+                                                   -RecordType A `
+                                                   -ZoneName "$configuration.eshopworld.$dnsSuffix" `
+                                                   -ResourceGroupName "global-platform-$configuration"
+
+            if(($existingDns -ne $null) -and $Force.IsPresent) {
+                $existingDns | Remove-AzureRmDnsRecordSet -Confirm:$False -Overwrite
+                $existingDns = $null
+            }
+
+            if($existingDns -eq $null) {
+                New-AzureRmDnsRecordSet -Name "$dnsName" `
+                                        -RecordType A `
+                                        -ZoneName "$configuration.eshopworld.$dnsSuffix" `
+                                        -ResourceGroupName "global-platform-$configuration" `
+                                        -Ttl 360 `
+                                        -DnsRecords (New-AzureRmDnsRecordConfig -IPv4Address "$pip") > $null
+            }
 
             $agRefresh | Add-AzureRmApplicationGatewayProbeConfig -Name "$Name" `
                                                            -Protocol Http `
