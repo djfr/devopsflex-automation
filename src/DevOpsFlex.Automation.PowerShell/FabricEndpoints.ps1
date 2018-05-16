@@ -79,22 +79,33 @@
                                     -DnsRecords (New-AzureRmDnsRecordConfig -IPv4Address "$pip") > $null
         }
 
+
+        # # # # # # # # # # # #
+
+        # $foo.Probes | ? { $_.Name -eq 'payments-notification-api' }
+
+#        if(($lb.Probes | ? { $_.Name -eq $Name }).Count -gt 0) {
+#
+#        }
+
+
+
         $lb | Add-AzureRmLoadBalancerProbeConfig -Name "$Name" `
-                                                -Protocol Http `
-                                                -Port $Port `
-                                                -RequestPath $ProbePath `
-                                                -IntervalInSeconds 30 `
-                                                -ProbeCount 2 > $null
+                                                 -Protocol Http `
+                                                 -Port $Port `
+                                                 -RequestPath $ProbePath `
+                                                 -IntervalInSeconds 30 `
+                                                 -ProbeCount 2 > $null
         $lb | Set-AzureRmLoadBalancer > $null
         $lbRefresh = (Get-AzureRmLoadBalancer -Name $lb.Name -ResourceGroupName $lb.ResourceGroupName)
 
         $lbRefresh | Add-AzureRmLoadBalancerRuleConfig -Name "$Name" `
-                                               -Protocol Tcp `
-                                               -ProbeId ($lbRefresh.Probes | ? { $_.Name -match $Name})[0].Id `
-                                               -FrontendPort $Port `
-                                               -BackendPort $Port `
-                                               -FrontendIpConfigurationId $lbRefresh.FrontendIpConfigurations[0].Id `
-                                               -BackendAddressPoolId $lbRefresh.BackendAddressPools[0].Id > $null
+                                                       -Protocol Tcp `
+                                                       -ProbeId ($lbRefresh.Probes | ? { $_.Name -match $Name})[0].Id `
+                                                       -FrontendPort $Port `
+                                                       -BackendPort $Port `
+                                                       -FrontendIpConfigurationId $lbRefresh.FrontendIpConfigurations[0].Id `
+                                                       -BackendAddressPoolId $lbRefresh.BackendAddressPools[0].Id > $null
         $lbRefresh | Set-AzureRmLoadBalancer > $null
     }
 
@@ -156,7 +167,7 @@
 
             $agRefresh | Add-AzureRmApplicationGatewayProbeConfig -Name "$Name" `
                                                            -Protocol Http `
-                                                           -HostName "$dnsName-ilb" `
+                                                           -HostName "$dnsName-lb.$configuration.eshopworld.$dnsSuffix" `
                                                            -Path "$ProbePath" `
                                                            -Interval 30 `
                                                            -Timeout 120 `
@@ -166,7 +177,7 @@
 
             $agRefresh | Add-AzureRmApplicationGatewayHttpListener -Name "$Name" `
                                                                    -Protocol "Https" `
-                                                                   -SslCertificate ($agRefresh.SslCertificates | ? { $_.Name -match "star.eshopworld.net" })[0] `
+                                                                   -SslCertificate ($agRefresh.SslCertificates | ? { $_.Name -match "star.$configuration.eshopworld.$dnsSuffix" })[0] `
                                                                    -FrontendIPConfiguration ($agRefresh.FrontendIPConfigurations)[0] `
                                                                    -FrontendPort ($agRefresh.FrontendPorts | ? { $_.Port -eq 443 })[0] `
                                                                    -HostName "$dnsName.$configuration.eshopworld.$dnsSuffix" > $null
