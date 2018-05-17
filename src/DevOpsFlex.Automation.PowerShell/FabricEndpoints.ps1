@@ -61,9 +61,10 @@
 
 
         $existingDns = Get-AzureRmDnsRecordSet -Name "$dnsName" `
-                                                -RecordType A `
-                                                -ZoneName "$configuration.eshopworld.$dnsSuffix" `
-                                                -ResourceGroupName "global-platform-$configuration"
+                                               -RecordType A `
+                                               -ZoneName "$configuration.eshopworld.$dnsSuffix" `
+                                               -ResourceGroupName "global-platform-$configuration" `
+                                               -ErrorAction SilentlyContinue
 
         if(($existingDns -ne $null) -and $Force.IsPresent) {
             $existingDns | Remove-AzureRmDnsRecordSet -Confirm:$False -Overwrite
@@ -79,24 +80,31 @@
                                     -DnsRecords (New-AzureRmDnsRecordConfig -IPv4Address "$pip") > $null
         }
 
+        try { $probe = ($lb.Probes | ? { $_.Name -eq $Name })[0] } catch {}
 
-        # # # # # # # # # # # #
+        if($probe -and $Force.IsPresent) {
+            $lb | Remove-AzureRmLoadBalancerProbeConfig -Name $probe.Name | Set-AzureRmLoadBalancer > $null
+            $probe = $null
+        }
+        $lbRefresh = (Get-AzureRmLoadBalancer -Name $lb.Name -ResourceGroupName $lb.ResourceGroupName)
 
-        # $foo.Probes | ? { $_.Name -eq 'payments-notification-api' }
+        if($probe -eq $null) {
+            $lbRefresh | Add-AzureRmLoadBalancerProbeConfig -Name "$Name" `
+                                                            -Protocol Http `
+                                                            -Port $Port `
+                                                            -RequestPath $ProbePath `
+                                                            -IntervalInSeconds 30 `
+                                                            -ProbeCount 2 > $null
+            $lbRefresh | Set-AzureRmLoadBalancer > $null
+            $lbRefresh = (Get-AzureRmLoadBalancer -Name $lb.Name -ResourceGroupName $lb.ResourceGroupName)
+        }
 
-#        if(($lb.Probes | ? { $_.Name -eq $Name }).Count -gt 0) {
-#
-#        }
+        try { $rule = ($lb.LoadBalancingRules | ? { $_.Name -eq $Name })[0] } catch {}
 
-
-
-        $lb | Add-AzureRmLoadBalancerProbeConfig -Name "$Name" `
-                                                 -Protocol Http `
-                                                 -Port $Port `
-                                                 -RequestPath $ProbePath `
-                                                 -IntervalInSeconds 30 `
-                                                 -ProbeCount 2 > $null
-        $lb | Set-AzureRmLoadBalancer > $null
+        if($rule -and $Force.IsPresent) {
+            $lbRefresh | Remove-AzureRmLoadBalancerRuleConfig -Name $rule.Name | Set-AzureRmLoadBalancer > $null
+            $rule = $null
+        }
         $lbRefresh = (Get-AzureRmLoadBalancer -Name $lb.Name -ResourceGroupName $lb.ResourceGroupName)
 
         $lbRefresh | Add-AzureRmLoadBalancerRuleConfig -Name "$Name" `
@@ -117,6 +125,7 @@
         foreach($ag in $appGateways) {
 
             ### MOVE THIS INTO IT'S OWN THING
+
             $ag.Name -match '\w*-(\w*)-\w*-(\w*)-\w*' > $null
             $region = $Matches[1]
             $configuration = $Matches[2]
@@ -149,7 +158,8 @@
             $existingDns = Get-AzureRmDnsRecordSet -Name "$dnsName" `
                                                    -RecordType A `
                                                    -ZoneName "$configuration.eshopworld.$dnsSuffix" `
-                                                   -ResourceGroupName "global-platform-$configuration"
+                                                   -ResourceGroupName "global-platform-$configuration" `
+                                                   -ErrorAction SilentlyContinue
 
             if(($existingDns -ne $null) -and $Force.IsPresent) {
                 $existingDns | Remove-AzureRmDnsRecordSet -Confirm:$False -Overwrite
