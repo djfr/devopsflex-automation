@@ -177,15 +177,15 @@
                                         -DnsRecords (New-AzureRmDnsRecordConfig -IPv4Address "$pip") > $null
             }
 
-            try { $probe = ($ag.Probes | ? { $_.Name -eq $Name })[0] } catch {}
+            try { $agProbe = ($ag.Probes | ? { $_.Name -eq $Name })[0] } catch {}
 
-            if($probe -and $Force.IsPresent) {
-                $agRefresh | Remove-AzureRmApplicationGatewayProbeConfig -Name $probe.Name | Set-AzureRmApplicationGateway > $null
-                $probe = $null
+            if($agProbe -and $Force.IsPresent) {
+                $agRefresh | Remove-AzureRmApplicationGatewayProbeConfig -Name $agProbe.Name | Set-AzureRmApplicationGateway > $null
+                $agProbe = $null
             }
             $agRefresh = Get-AzureRmApplicationGateway -Name $ag.Name -ResourceGroupName $ag.ResourceGroupName
 
-            if($probe -eq $null) {
+            if($agProbe -eq $null) {
                 $agRefresh | Add-AzureRmApplicationGatewayProbeConfig -Name "$Name" `
                                                                -Protocol Http `
                                                                -HostName "$dnsName-lb.$configuration.eshopworld.$dnsSuffix" `
@@ -234,15 +234,15 @@
                 $agRefresh = Get-AzureRmApplicationGateway -Name $ag.Name -ResourceGroupName $ag.ResourceGroupName
             }
 
-            try { $rule = ($ag.RequestRoutingRules | ? { $_.Name -eq $Name })[0] } catch {}
+            try { $agRule = ($ag.RequestRoutingRules | ? { $_.Name -eq $Name })[0] } catch {}
 
-            if($rule -and $Force.IsPresent) {
-                $agRefresh | Remove-AzureRmApplicationGatewayRequestRoutingRule -Name $rule.Name | Set-AzureRmApplicationGateway > $null
-                $rule = $null
+            if($agRule -and $Force.IsPresent) {
+                $agRefresh | Remove-AzureRmApplicationGatewayRequestRoutingRule -Name $agRule.Name | Set-AzureRmApplicationGateway > $null
+                $agRule = $null
             }
             $agRefresh = Get-AzureRmApplicationGateway -Name $ag.Name -ResourceGroupName $ag.ResourceGroupName
 
-            if($rule -eq $null) {
+            if($agRule -eq $null) {
                 $agRefresh | Add-AzureRmApplicationGatewayRequestRoutingRule -Name $Name `
                                                                              -RuleType Basic `
                                                                              -BackendHttpSettings ($agRefresh.BackendHttpSettingsCollection | ? { $_.Name -match $Name })[0] `
