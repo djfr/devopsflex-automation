@@ -107,14 +107,16 @@
         }
         $lbRefresh = (Get-AzureRmLoadBalancer -Name $lb.Name -ResourceGroupName $lb.ResourceGroupName)
 
-        $lbRefresh | Add-AzureRmLoadBalancerRuleConfig -Name "$Name" `
-                                                       -Protocol Tcp `
-                                                       -ProbeId ($lbRefresh.Probes | ? { $_.Name -match $Name})[0].Id `
-                                                       -FrontendPort $Port `
-                                                       -BackendPort $Port `
-                                                       -FrontendIpConfigurationId $lbRefresh.FrontendIpConfigurations[0].Id `
-                                                       -BackendAddressPoolId $lbRefresh.BackendAddressPools[0].Id > $null
-        $lbRefresh | Set-AzureRmLoadBalancer > $null
+        if($rule -eq $null) {
+            $lbRefresh | Add-AzureRmLoadBalancerRuleConfig -Name "$Name" `
+                                                           -Protocol Tcp `
+                                                           -ProbeId ($lbRefresh.Probes | ? { $_.Name -match $Name})[0].Id `
+                                                           -FrontendPort $Port `
+                                                           -BackendPort $Port `
+                                                           -FrontendIpConfigurationId $lbRefresh.FrontendIpConfigurations[0].Id `
+                                                           -BackendAddressPoolId $lbRefresh.BackendAddressPools[0].Id > $null
+            $lbRefresh | Set-AzureRmLoadBalancer > $null
+        }
     }
 
     Write-Host 'Done with LBs'
@@ -146,7 +148,7 @@
             ###
 
             if(($ag.FrontendPorts | ? { $_.Port -eq 443 }).Count -eq 0) {
-                $ag | Add-AzureRmApplicationGatewayFrontendPort -Name 'https-port' -Port 443
+                $ag | Add-AzureRmApplicationGatewayFrontendPort -Name 'https-port' -Port 443 | Set-AzureRmApplicationGateway > $null
             }
 
             $agRefresh = Get-AzureRmApplicationGateway -Name $ag.Name -ResourceGroupName $ag.ResourceGroupName
@@ -162,7 +164,7 @@
                                                    -ErrorAction SilentlyContinue
 
             if(($existingDns -ne $null) -and $Force.IsPresent) {
-                $existingDns | Remove-AzureRmDnsRecordSet -Confirm:$False -Overwrite
+                $existingDns | Remove-AzureRmDnsRecordSet -Confirm:$False -Overwrite  > $null
                 $existingDns = $null
             }
 
@@ -175,39 +177,79 @@
                                         -DnsRecords (New-AzureRmDnsRecordConfig -IPv4Address "$pip") > $null
             }
 
-            $agRefresh | Add-AzureRmApplicationGatewayProbeConfig -Name "$Name" `
-                                                           -Protocol Http `
-                                                           -HostName "$dnsName-lb.$configuration.eshopworld.$dnsSuffix" `
-                                                           -Path "$ProbePath" `
-                                                           -Interval 30 `
-                                                           -Timeout 120 `
-                                                           -UnhealthyThreshold 2 > $null
-            $agRefresh | Set-AzureRmApplicationGateway > $null
+            try { $probe = ($ag.Probes | ? { $_.Name -eq $Name })[0] } catch {}
+
+            if($probe -and $Force.IsPresent) {
+                $agRefresh | Remove-AzureRmApplicationGatewayProbeConfig -Name $probe.Name | Set-AzureRmApplicationGateway > $null
+                $probe = $null
+            }
             $agRefresh = Get-AzureRmApplicationGateway -Name $ag.Name -ResourceGroupName $ag.ResourceGroupName
 
-            $agRefresh | Add-AzureRmApplicationGatewayHttpListener -Name "$Name" `
-                                                                   -Protocol "Https" `
-                                                                   -SslCertificate ($agRefresh.SslCertificates | ? { $_.Name -match "star.$configuration.eshopworld.$dnsSuffix" })[0] `
-                                                                   -FrontendIPConfiguration ($agRefresh.FrontendIPConfigurations)[0] `
-                                                                   -FrontendPort ($agRefresh.FrontendPorts | ? { $_.Port -eq 443 })[0] `
-                                                                   -HostName "$dnsName.$configuration.eshopworld.$dnsSuffix" > $null
-            $agRefresh | Set-AzureRmApplicationGateway > $null
+            if($probe -eq $null) {
+                $agRefresh | Add-AzureRmApplicationGatewayProbeConfig -Name "$Name" `
+                                                               -Protocol Http `
+                                                               -HostName "$dnsName-lb.$configuration.eshopworld.$dnsSuffix" `
+                                                               -Path "$ProbePath" `
+                                                               -Interval 30 `
+                                                               -Timeout 120 `
+                                                               -UnhealthyThreshold 2 > $null
+                $agRefresh | Set-AzureRmApplicationGateway > $null
+                $agRefresh = Get-AzureRmApplicationGateway -Name $ag.Name -ResourceGroupName $ag.ResourceGroupName
+            }
+
+            try { $listener = ($ag.HttpListeners | ? { $_.Name -eq $Name })[0] } catch {}
+
+            if($listener -and $Force.IsPresent) {
+                $agRefresh | Remove-AzureRmApplicationGatewayHttpListener -Name $listener.Name | Set-AzureRmApplicationGateway > $null
+                $listener = $null
+            }
             $agRefresh = Get-AzureRmApplicationGateway -Name $ag.Name -ResourceGroupName $ag.ResourceGroupName
 
-            $agRefresh | Add-AzureRmApplicationGatewayBackendHttpSettings -Name "$Name" `
-                                                                          -Port $Port `
-                                                                          -Protocol "HTTP" `
-                                                                          -Probe ($agRefresh.Probes | ? { $_.Name -match $Name})[0] `
-                                                                          -CookieBasedAffinity "Disabled" > $null
-            $agRefresh | Set-AzureRmApplicationGateway > $null
+            if($listener -eq $null) {
+                $agRefresh | Add-AzureRmApplicationGatewayHttpListener -Name "$Name" `
+                                                                       -Protocol "Https" `
+                                                                       -SslCertificate ($agRefresh.SslCertificates | ? { $_.Name -match "star.$configuration.eshopworld.$dnsSuffix" })[0] `
+                                                                       -FrontendIPConfiguration ($agRefresh.FrontendIPConfigurations)[0] `
+                                                                       -FrontendPort ($agRefresh.FrontendPorts | ? { $_.Port -eq 443 })[0] `
+                                                                       -HostName "$dnsName.$configuration.eshopworld.$dnsSuffix" > $null
+                $agRefresh | Set-AzureRmApplicationGateway > $null
+                $agRefresh = Get-AzureRmApplicationGateway -Name $ag.Name -ResourceGroupName $ag.ResourceGroupName
+            }
+
+            try { $httpSetting = ($ag.BackendHttpSettingsCollection | ? { $_.Name -eq $Name })[0] } catch {}
+
+            if($httpSetting -and $Force.IsPresent) {
+                $agRefresh | Remove-AzureRmApplicationGatewayBackendHttpSettings -Name $httpSetting.Name | Set-AzureRmApplicationGateway > $null
+                $httpSetting = $null
+            }
             $agRefresh = Get-AzureRmApplicationGateway -Name $ag.Name -ResourceGroupName $ag.ResourceGroupName
 
-            $agRefresh | Add-AzureRmApplicationGatewayRequestRoutingRule -Name $Name `
-                                                                         -RuleType Basic `
-                                                                         -BackendHttpSettings ($agRefresh.BackendHttpSettingsCollection | ? { $_.Name -match $Name })[0] `
-                                                                         -HttpListener ($agRefresh.HttpListeners | ? { $_.Name -match $Name })[0] `
-                                                                         -BackendAddressPool ($agRefresh.BackendAddressPools)[0] > $null
-            $agRefresh | Set-AzureRmApplicationGateway > $null
+            if($httpSetting -eq $null) {
+                $agRefresh | Add-AzureRmApplicationGatewayBackendHttpSettings -Name "$Name" `
+                                                                              -Port $Port `
+                                                                              -Protocol "HTTP" `
+                                                                              -Probe ($agRefresh.Probes | ? { $_.Name -match $Name})[0] `
+                                                                              -CookieBasedAffinity "Disabled" > $null
+                $agRefresh | Set-AzureRmApplicationGateway > $null
+                $agRefresh = Get-AzureRmApplicationGateway -Name $ag.Name -ResourceGroupName $ag.ResourceGroupName
+            }
+
+            try { $rule = ($ag.RequestRoutingRules | ? { $_.Name -eq $Name })[0] } catch {}
+
+            if($rule -and $Force.IsPresent) {
+                $agRefresh | Remove-AzureRmApplicationGatewayRequestRoutingRule -Name $rule.Name | Set-AzureRmApplicationGateway > $null
+                $rule = $null
+            }
+            $agRefresh = Get-AzureRmApplicationGateway -Name $ag.Name -ResourceGroupName $ag.ResourceGroupName
+
+            if($rule -eq $null) {
+                $agRefresh | Add-AzureRmApplicationGatewayRequestRoutingRule -Name $Name `
+                                                                             -RuleType Basic `
+                                                                             -BackendHttpSettings ($agRefresh.BackendHttpSettingsCollection | ? { $_.Name -match $Name })[0] `
+                                                                             -HttpListener ($agRefresh.HttpListeners | ? { $_.Name -match $Name })[0] `
+                                                                             -BackendAddressPool ($agRefresh.BackendAddressPools)[0] > $null
+                $agRefresh | Set-AzureRmApplicationGateway > $null
+            }
         }
 
         Write-Host 'Done with AGs'
