@@ -323,5 +323,6 @@ function New-FabricEndPoint
         }
     }
 
+    Write-Host 'Done with TM'
     Write-Host 'Done with everything'
 }
