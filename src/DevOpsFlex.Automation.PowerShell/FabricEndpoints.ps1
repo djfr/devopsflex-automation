@@ -13,7 +13,8 @@
             "sea" { return "Southeast Asia" }
             default { throw "Unknown region mapping for: $($this.Region)" }
         }
-        return $this.Alias
+
+        throw "Unknown region mapping for: $($this.Region)"
     }
 }
 
