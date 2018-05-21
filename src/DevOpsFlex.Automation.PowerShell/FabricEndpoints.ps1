@@ -34,6 +34,13 @@
         $region = $Matches[1]
         $configuration = $Matches[2]
 
+        switch($configuration)
+        {
+            "sand" { $dnsConfiguration = "sandbox" }
+            "pprod" { $dnsConfiguration = "preprod" }
+            default { $dnsConfiguration = $configuration }
+        }
+
         if($configuration -eq 'prod' -or $configuration -eq 'sand') {
             $dnsSuffix = 'com'
         }
@@ -62,7 +69,7 @@
 
         $existingDns = Get-AzureRmDnsRecordSet -Name "$dnsName" `
                                                -RecordType A `
-                                               -ZoneName "$configuration.eshopworld.$dnsSuffix" `
+                                               -ZoneName "$dnsConfiguration.eshopworld.$dnsSuffix" `
                                                -ResourceGroupName "global-platform-$configuration" `
                                                -ErrorAction SilentlyContinue
 
@@ -74,7 +81,7 @@
         if($existingDns -eq $null) {
             New-AzureRmDnsRecordSet -Name "$dnsName" `
                                     -RecordType A `
-                                    -ZoneName "$configuration.eshopworld.$dnsSuffix" `
+                                    -ZoneName "$dnsConfiguration.eshopworld.$dnsSuffix" `
                                     -ResourceGroupName "global-platform-$configuration" `
                                     -Ttl 360 `
                                     -DnsRecords (New-AzureRmDnsRecordConfig -IPv4Address "$pip") > $null
@@ -132,6 +139,13 @@
             $region = $Matches[1]
             $configuration = $Matches[2]
 
+            switch($configuration)
+            {
+                "sand" { $dnsConfiguration = "sandbox" }
+                "pprod" { $dnsConfiguration = "preprod" }
+                default { $dnsConfiguration = $configuration }
+            }
+
             if($configuration -eq 'prod' -or $configuration -eq 'sand') {
                 $dnsSuffix = 'com'
             }
@@ -159,7 +173,7 @@
 
             $existingDns = Get-AzureRmDnsRecordSet -Name "$dnsName" `
                                                    -RecordType A `
-                                                   -ZoneName "$configuration.eshopworld.$dnsSuffix" `
+                                                   -ZoneName "$dnsConfiguration.eshopworld.$dnsSuffix" `
                                                    -ResourceGroupName "global-platform-$configuration" `
                                                    -ErrorAction SilentlyContinue
 
@@ -171,7 +185,7 @@
             if($existingDns -eq $null) {
                 New-AzureRmDnsRecordSet -Name "$dnsName" `
                                         -RecordType A `
-                                        -ZoneName "$configuration.eshopworld.$dnsSuffix" `
+                                        -ZoneName "$dnsConfiguration.eshopworld.$dnsSuffix" `
                                         -ResourceGroupName "global-platform-$configuration" `
                                         -Ttl 360 `
                                         -DnsRecords (New-AzureRmDnsRecordConfig -IPv4Address "$pip") > $null
@@ -188,7 +202,7 @@
             if($agProbe -eq $null) {
                 $agRefresh | Add-AzureRmApplicationGatewayProbeConfig -Name "$Name" `
                                                                -Protocol Http `
-                                                               -HostName "$dnsName-lb.$configuration.eshopworld.$dnsSuffix" `
+                                                               -HostName "$dnsName-lb.$dnsConfiguration.eshopworld.$dnsSuffix" `
                                                                -Path "$ProbePath" `
                                                                -Interval 30 `
                                                                -Timeout 120 `
@@ -208,10 +222,10 @@
             if($listener -eq $null) {
                 $agRefresh | Add-AzureRmApplicationGatewayHttpListener -Name "$Name" `
                                                                        -Protocol "Https" `
-                                                                       -SslCertificate ($agRefresh.SslCertificates | ? { $_.Name -eq "star.$configuration.eshopworld.$dnsSuffix" })[0] `
+                                                                       -SslCertificate ($agRefresh.SslCertificates | ? { $_.Name -eq "star.$dnsConfiguration.eshopworld.$dnsSuffix" })[0] `
                                                                        -FrontendIPConfiguration ($agRefresh.FrontendIPConfigurations)[0] `
                                                                        -FrontendPort ($agRefresh.FrontendPorts | ? { $_.Port -eq 443 })[0] `
-                                                                       -HostName "$dnsName.$configuration.eshopworld.$dnsSuffix" > $null
+                                                                       -HostName "$dnsName.$dnsConfiguration.eshopworld.$dnsSuffix" > $null
                 $agRefresh | Set-AzureRmApplicationGateway > $null
                 $agRefresh = Get-AzureRmApplicationGateway -Name $ag.Name -ResourceGroupName $ag.ResourceGroupName
             }
