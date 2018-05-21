@@ -1,4 +1,23 @@
-﻿function New-FabricEndPoint
+﻿class DnsEndpoint {
+    [string] $Uri
+    [string] $Region
+
+    DnsEndpoint () { }
+
+    [string] GetRegionName()
+    {
+        switch($this.region) {
+            "we" { return "West Europe" }
+            "eus" { return "East US" }
+            "ase" { return "Australia Southeast" }
+            "sea" { return "Southeast Asia" }
+            default { throw "Unknown region mapping for: $($this.Region)" }
+        }
+        return $this.Alias
+    }
+}
+
+function New-FabricEndPoint
 {
     [CmdletBinding()]
     param
@@ -25,6 +44,8 @@
         $lbs = Get-AzureRmLoadBalancer | ? { $_.Name.ToLower() -match '-lb' }
         $dnsLayerSuffix = ""
     }
+
+    $dnsEndpoints = @()
 
     foreach($lb in $lbs) {
 
@@ -65,11 +86,11 @@
             $pip = (Get-AzureRmPublicIpAddress -Name $pipRes.ResourceName -ResourceGroupName $pipRes.ResourceGroupName).IpAddress
         }
 
-
+        $dnsRoot = "$dnsConfiguration.eshopworld.$dnsSuffix"
 
         $existingDns = Get-AzureRmDnsRecordSet -Name "$dnsName" `
                                                -RecordType A `
-                                               -ZoneName "$dnsConfiguration.eshopworld.$dnsSuffix" `
+                                               -ZoneName $dnsRoot `
                                                -ResourceGroupName "global-platform-$configuration" `
                                                -ErrorAction SilentlyContinue
 
@@ -81,10 +102,15 @@
         if($existingDns -eq $null) {
             New-AzureRmDnsRecordSet -Name "$dnsName" `
                                     -RecordType A `
-                                    -ZoneName "$dnsConfiguration.eshopworld.$dnsSuffix" `
+                                    -ZoneName $dnsRoot `
                                     -ResourceGroupName "global-platform-$configuration" `
                                     -Ttl 360 `
                                     -DnsRecords (New-AzureRmDnsRecordConfig -IPv4Address "$pip") > $null
+        }
+
+        if(-not $UseSsl.IsPresent) {
+            $dnsEndpoints.Add([DnsEndpoint]@{Uri = "$dnsName.$dnsRoot";
+                                             Region = $region;})
         }
 
         try { $probe = ($lb.Probes | ? { $_.Name -eq $Name })[0] } catch {}
@@ -171,9 +197,11 @@
             $pipRes = Get-AzureRmResource -ResourceId ($ag.FrontendIPConfigurations[0].PublicIPAddress.Id)
             $pip = (Get-AzureRmPublicIpAddress -Name $pipRes.ResourceName -ResourceGroupName $pipRes.ResourceGroupName).IpAddress
 
+            $dnsRoot = "$dnsConfiguration.eshopworld.$dnsSuffix"
+
             $existingDns = Get-AzureRmDnsRecordSet -Name "$dnsName" `
                                                    -RecordType A `
-                                                   -ZoneName "$dnsConfiguration.eshopworld.$dnsSuffix" `
+                                                   -ZoneName $dnsRoot `
                                                    -ResourceGroupName "global-platform-$configuration" `
                                                    -ErrorAction SilentlyContinue
 
@@ -185,11 +213,14 @@
             if($existingDns -eq $null) {
                 New-AzureRmDnsRecordSet -Name "$dnsName" `
                                         -RecordType A `
-                                        -ZoneName "$dnsConfiguration.eshopworld.$dnsSuffix" `
+                                        -ZoneName $dnsRoot `
                                         -ResourceGroupName "global-platform-$configuration" `
                                         -Ttl 360 `
                                         -DnsRecords (New-AzureRmDnsRecordConfig -IPv4Address "$pip") > $null
             }
+
+            $dnsEndpoints.Add([DnsEndpoint]@{Uri = "$dnsName.$dnsRoot";
+                                             Region = $region;})
 
             try { $agProbe = ($ag.Probes | ? { $_.Name -eq $Name })[0] } catch {}
 
@@ -267,6 +298,28 @@
         }
 
         Write-Host 'Done with AGs'
+    }
+
+    if($dnsEndpoints.Count -gt 0) {
+        $profile = New-AzureRmTrafficManagerProfile -Name $Name `
+                                                    -ResourceGroupName "global-platform-$configuration" `
+                                                    -TrafficRoutingMethod Performance `
+                                                    -RelativeDnsName "esw-$Name-$configuration" `
+                                                    -Ttl 30 `
+                                                    -MonitorProtocol HTTPS `
+                                                    -MonitorPort 443 `
+                                                    -MonitorPath $ProbePath `
+                                                    -MonitorIntervalInSeconds 10 `
+                                                    -MonitorTimeoutInSeconds 9 `
+                                                    -MonitorToleratedNumberOfFailures 2
+
+        foreach($endpoint in $dnsEndpoints) {
+            $profile | Add-AzureRmTrafficManagerEndpointConfig -EndpointName "$($endpoint.Region)-endpoint" `
+                                                               -Type ExternalEndpoints `
+                                                               -Target $endpoint.Uri `
+                                                               -EndpointLocation $endpoint.GetRegionName() `
+                                                               -EndpointStatus Enabled
+        }
     }
 
     Write-Host 'Done with everything'
