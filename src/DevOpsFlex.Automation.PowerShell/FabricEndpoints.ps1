@@ -110,7 +110,7 @@
         if($rule -eq $null) {
             $lbRefresh | Add-AzureRmLoadBalancerRuleConfig -Name "$Name" `
                                                            -Protocol Tcp `
-                                                           -ProbeId ($lbRefresh.Probes | ? { $_.Name -match $Name})[0].Id `
+                                                           -ProbeId ($lbRefresh.Probes | ? { $_.Name -eq $Name})[0].Id `
                                                            -FrontendPort $Port `
                                                            -BackendPort $Port `
                                                            -FrontendIpConfigurationId $lbRefresh.FrontendIpConfigurations[0].Id `
@@ -208,7 +208,7 @@
             if($listener -eq $null) {
                 $agRefresh | Add-AzureRmApplicationGatewayHttpListener -Name "$Name" `
                                                                        -Protocol "Https" `
-                                                                       -SslCertificate ($agRefresh.SslCertificates | ? { $_.Name -match "star.$configuration.eshopworld.$dnsSuffix" })[0] `
+                                                                       -SslCertificate ($agRefresh.SslCertificates | ? { $_.Name -eq "star.$configuration.eshopworld.$dnsSuffix" })[0] `
                                                                        -FrontendIPConfiguration ($agRefresh.FrontendIPConfigurations)[0] `
                                                                        -FrontendPort ($agRefresh.FrontendPorts | ? { $_.Port -eq 443 })[0] `
                                                                        -HostName "$dnsName.$configuration.eshopworld.$dnsSuffix" > $null
@@ -228,7 +228,7 @@
                 $agRefresh | Add-AzureRmApplicationGatewayBackendHttpSettings -Name "$Name" `
                                                                               -Port $Port `
                                                                               -Protocol "HTTP" `
-                                                                              -Probe ($agRefresh.Probes | ? { $_.Name -match $Name})[0] `
+                                                                              -Probe ($agRefresh.Probes | ? { $_.Name -eq $Name})[0] `
                                                                               -CookieBasedAffinity "Disabled" > $null
                 $agRefresh | Set-AzureRmApplicationGateway > $null
                 $agRefresh = Get-AzureRmApplicationGateway -Name $ag.Name -ResourceGroupName $ag.ResourceGroupName
@@ -245,8 +245,8 @@
             if($agRule -eq $null) {
                 $agRefresh | Add-AzureRmApplicationGatewayRequestRoutingRule -Name $Name `
                                                                              -RuleType Basic `
-                                                                             -BackendHttpSettings ($agRefresh.BackendHttpSettingsCollection | ? { $_.Name -match $Name })[0] `
-                                                                             -HttpListener ($agRefresh.HttpListeners | ? { $_.Name -match $Name })[0] `
+                                                                             -BackendHttpSettings ($agRefresh.BackendHttpSettingsCollection | ? { $_.Name -eq $Name })[0] `
+                                                                             -HttpListener ($agRefresh.HttpListeners | ? { $_.Name -eq $Name })[0] `
                                                                              -BackendAddressPool ($agRefresh.BackendAddressPools)[0] > $null
                 $agRefresh | Set-AzureRmApplicationGateway > $null
             }
