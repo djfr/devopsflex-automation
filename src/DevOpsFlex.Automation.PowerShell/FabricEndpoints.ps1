@@ -110,8 +110,8 @@ function New-FabricEndPoint
         }
 
         if(-not $UseSsl.IsPresent) {
-            $dnsEndpoints.Add([DnsEndpoint]@{Uri = "$dnsName.$dnsRoot";
-                                             Region = $region;})
+            $dnsEndpoints += [DnsEndpoint]@{Uri = "$dnsName.$dnsRoot";
+                                            Region = $region;}
         }
 
         try { $probe = ($lb.Probes | ? { $_.Name -eq $Name })[0] } catch {}
@@ -220,8 +220,8 @@ function New-FabricEndPoint
                                         -DnsRecords (New-AzureRmDnsRecordConfig -IPv4Address "$pip") > $null
             }
 
-            $dnsEndpoints.Add([DnsEndpoint]@{Uri = "$dnsName.$dnsRoot";
-                                             Region = $region;})
+            $dnsEndpoints += [DnsEndpoint]@{Uri = "$dnsName.$dnsRoot";
+                                            Region = $region;}
 
             try { $agProbe = ($ag.Probes | ? { $_.Name -eq $Name })[0] } catch {}
 
@@ -302,13 +302,22 @@ function New-FabricEndPoint
     }
 
     if($dnsEndpoints.Count -gt 0) {
+        if($UseSsl.IsPresent) {
+            $tmPort = 443
+            $monitorProtocol = "HTTPS"
+        }
+        else {
+            $tmPort = $Port
+            $monitorProtocol = "HTTP"
+        }
+
         $profile = New-AzureRmTrafficManagerProfile -Name $Name `
                                                     -ResourceGroupName "global-platform-$configuration" `
                                                     -TrafficRoutingMethod Performance `
                                                     -RelativeDnsName "esw-$Name-$configuration" `
                                                     -Ttl 30 `
-                                                    -MonitorProtocol HTTPS `
-                                                    -MonitorPort 443 `
+                                                    -MonitorProtocol $monitorProtocol `
+                                                    -MonitorPort $tmPort `
                                                     -MonitorPath $ProbePath `
                                                     -MonitorIntervalInSeconds 10 `
                                                     -MonitorTimeoutInSeconds 9 `
@@ -319,8 +328,10 @@ function New-FabricEndPoint
                                                                -Type ExternalEndpoints `
                                                                -Target $endpoint.Uri `
                                                                -EndpointLocation $endpoint.GetRegionName() `
-                                                               -EndpointStatus Enabled
+                                                               -EndpointStatus Enabled > $null
         }
+
+        $profile | Set-AzureRmTrafficManagerProfile > $null
     }
 
     Write-Host 'Done with TM'
