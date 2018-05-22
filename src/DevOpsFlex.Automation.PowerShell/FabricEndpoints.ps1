@@ -311,24 +311,32 @@ function New-FabricEndPoint
             $monitorProtocol = "HTTP"
         }
 
-        $profile = New-AzureRmTrafficManagerProfile -Name $Name `
-                                                    -ResourceGroupName "global-platform-$configuration" `
-                                                    -TrafficRoutingMethod Performance `
-                                                    -RelativeDnsName "esw-$Name-$configuration" `
-                                                    -Ttl 30 `
-                                                    -MonitorProtocol $monitorProtocol `
-                                                    -MonitorPort $tmPort `
-                                                    -MonitorPath $ProbePath `
-                                                    -MonitorIntervalInSeconds 10 `
-                                                    -MonitorTimeoutInSeconds 9 `
-                                                    -MonitorToleratedNumberOfFailures 2
+        $profile = try { Get-AzureRmTrafficManagerProfile -Name $Name -ResourceGroupName "global-platform-$configuration" } catch { }
+
+        if(-not $profile) {
+            $profile = New-AzureRmTrafficManagerProfile -Name $Name `
+                                                        -ResourceGroupName "global-platform-$configuration" `
+                                                        -TrafficRoutingMethod Performance `
+                                                        -RelativeDnsName "esw-$Name-$configuration" `
+                                                        -Ttl 30 `
+                                                        -MonitorProtocol $monitorProtocol `
+                                                        -MonitorPort $tmPort `
+                                                        -MonitorPath $ProbePath `
+                                                        -MonitorIntervalInSeconds 10 `
+                                                        -MonitorTimeoutInSeconds 9 `
+                                                        -MonitorToleratedNumberOfFailures 2
+        }
 
         foreach($endpoint in $dnsEndpoints) {
-            $profile | Add-AzureRmTrafficManagerEndpointConfig -EndpointName "$($endpoint.Region)-endpoint" `
-                                                               -Type ExternalEndpoints `
-                                                               -Target $endpoint.Uri `
-                                                               -EndpointLocation $endpoint.GetRegionName() `
-                                                               -EndpointStatus Enabled > $null
+            $tmEndpoints = $profile.Endpoints | ? { $_.Name -eq "$($endpoint.Region)-endpoint" }
+
+            if($tmEndpoints.Count -eq 0) {
+                $profile | Add-AzureRmTrafficManagerEndpointConfig -EndpointName "$($endpoint.Region)-endpoint" `
+                                                                   -Type ExternalEndpoints `
+                                                                   -Target $endpoint.Uri `
+                                                                   -EndpointLocation $endpoint.GetRegionName() `
+                                                                   -EndpointStatus Enabled > $null
+            }
         }
 
         $profile | Set-AzureRmTrafficManagerProfile > $null
