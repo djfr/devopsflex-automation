@@ -170,6 +170,7 @@ function New-FabricEndPoint
             {
                 "sand" { $dnsConfiguration = "sandbox" }
                 "pprod" { $dnsConfiguration = "preprod" }
+                "prod" { $dnsConfiguration = "production" }
                 default { $dnsConfiguration = $configuration }
             }
 
@@ -301,7 +302,7 @@ function New-FabricEndPoint
         Write-Host 'Done with AGs'
     }
 
-    if($dnsEndpoints.Count -gt 0) {
+    if($dnsEndpoints.Count -gt 1) {
         if($UseSsl.IsPresent) {
             $tmPort = 443
             $monitorProtocol = "HTTPS"
