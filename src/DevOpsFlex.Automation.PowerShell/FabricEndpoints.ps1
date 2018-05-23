@@ -303,6 +303,28 @@ function New-FabricEndPoint
     }
 
     if($dnsEndpoints.Count -gt 1) {
+        $tmDnsPrefix = "esw-$Name-$configuration"
+
+        $existingDns = Get-AzureRmDnsRecordSet -Name "$Name" `
+                                               -RecordType CNAME `
+                                               -ZoneName $dnsRoot `
+                                               -ResourceGroupName "global-platform-$configuration" `
+                                               -ErrorAction SilentlyContinue
+
+        if(($existingDns -ne $null) -and $Force.IsPresent) {
+            $existingDns | Remove-AzureRmDnsRecordSet -Confirm:$False -Overwrite  > $null
+            $existingDns = $null
+        }
+
+        if($existingDns -eq $null) {
+            New-AzureRmDnsRecordSet -Name "$Name" `
+                                    -RecordType CNAME `
+                                    -ZoneName $dnsRoot `
+                                    -ResourceGroupName "global-platform-$configuration" `
+                                    -Ttl 30 `
+                                    -DnsRecords (New-AzureRmDnsRecordConfig -Cname "$tmDnsPrefix.trafficmanager.net") > $null
+        }
+
         if($UseSsl.IsPresent) {
             $tmPort = 443
             $monitorProtocol = "HTTPS"
@@ -318,7 +340,7 @@ function New-FabricEndPoint
             $profile = New-AzureRmTrafficManagerProfile -Name $Name `
                                                         -ResourceGroupName "global-platform-$configuration" `
                                                         -TrafficRoutingMethod Performance `
-                                                        -RelativeDnsName "esw-$Name-$configuration" `
+                                                        -RelativeDnsName $tmDnsPrefix `
                                                         -Ttl 30 `
                                                         -MonitorProtocol $monitorProtocol `
                                                         -MonitorPort $tmPort `
