@@ -334,7 +334,9 @@ function New-FabricEndPoint
             $monitorProtocol = "HTTP"
         }
 
-        $profile = try { Get-AzureRmTrafficManagerProfile -Name $Name -ResourceGroupName "global-platform-$configuration" } catch { }
+        $profile = Get-AzureRmTrafficManagerProfile -Name $Name `
+                                                    -ResourceGroupName "global-platform-$configuration" `
+                                                    -ErrorAction SilentlyContinue
 
         if(-not $profile) {
             $profile = New-AzureRmTrafficManagerProfile -Name $Name `
