@@ -181,7 +181,7 @@ function New-FabricEndPoint
                 $dnsSuffix = 'net'
             }
 
-            if($lbs.Count -gt 1) {
+            if($appGateways.Count -gt 1) {
                 $dnsName = "$Name-$region"
             }
             else {
@@ -263,6 +263,29 @@ function New-FabricEndPoint
                 $agRefresh = Get-AzureRmApplicationGateway -Name $ag.Name -ResourceGroupName $ag.ResourceGroupName
             }
 
+            ## multiple regions - need to create top dns listener because TM will be there
+            if($appGateways.Count -gt 1) {
+                $listener = $null
+                try { $listener = ($ag.HttpListeners | ? { $_.Name -eq "$Name-tm" })[0] } catch {}
+
+                if($listener -and $Force.IsPresent) {
+                    $agRefresh | Remove-AzureRmApplicationGatewayHttpListener -Name $listener.Name | Set-AzureRmApplicationGateway > $null
+                    $listener = $null
+                }
+                $agRefresh = Get-AzureRmApplicationGateway -Name $ag.Name -ResourceGroupName $ag.ResourceGroupName
+
+                if($listener -eq $null) {
+                    $agRefresh | Add-AzureRmApplicationGatewayHttpListener -Name "$Name-tm" `
+                                                                           -Protocol "Https" `
+                                                                           -SslCertificate ($agRefresh.SslCertificates | ? { $_.Name -eq "star.$dnsConfiguration.eshopworld.$dnsSuffix" })[0] `
+                                                                           -FrontendIPConfiguration ($agRefresh.FrontendIPConfigurations)[0] `
+                                                                           -FrontendPort ($agRefresh.FrontendPorts | ? { $_.Port -eq 443 })[0] `
+                                                                           -HostName "$Name.$dnsConfiguration.eshopworld.$dnsSuffix" > $null
+                    $agRefresh | Set-AzureRmApplicationGateway > $null
+                    $agRefresh = Get-AzureRmApplicationGateway -Name $ag.Name -ResourceGroupName $ag.ResourceGroupName
+                }
+            }
+
             try { $httpSetting = ($ag.BackendHttpSettingsCollection | ? { $_.Name -eq $Name })[0] } catch {}
 
             if($httpSetting -and $Force.IsPresent) {
@@ -296,6 +319,27 @@ function New-FabricEndPoint
                                                                              -HttpListener ($agRefresh.HttpListeners | ? { $_.Name -eq $Name })[0] `
                                                                              -BackendAddressPool ($agRefresh.BackendAddressPools)[0] > $null
                 $agRefresh | Set-AzureRmApplicationGateway > $null
+            }
+
+            ## multiple regions - need to create top dns rule because TM will be there
+            if($appGateways.Count -gt 1) {
+                $agRule = $null
+                try { $agRule = ($ag.RequestRoutingRules | ? { $_.Name -eq "$Name-tm" })[0] } catch {}
+
+                if($agRule -and $Force.IsPresent) {
+                    $agRefresh | Remove-AzureRmApplicationGatewayRequestRoutingRule -Name $agRule.Name | Set-AzureRmApplicationGateway > $null
+                    $agRule = $null
+                }
+                $agRefresh = Get-AzureRmApplicationGateway -Name $ag.Name -ResourceGroupName $ag.ResourceGroupName
+
+                if($agRule -eq $null) {
+                    $agRefresh | Add-AzureRmApplicationGatewayRequestRoutingRule -Name "$Name-tm" `
+                                                                                 -RuleType Basic `
+                                                                                 -BackendHttpSettings ($agRefresh.BackendHttpSettingsCollection | ? { $_.Name -eq $Name })[0] `
+                                                                                 -HttpListener ($agRefresh.HttpListeners | ? { $_.Name -eq "$Name-tm" })[0] `
+                                                                                 -BackendAddressPool ($agRefresh.BackendAddressPools)[0] > $null
+                    $agRefresh | Set-AzureRmApplicationGateway > $null
+                }
             }
         }
 
