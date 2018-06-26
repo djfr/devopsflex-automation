@@ -59,7 +59,8 @@ function New-FabricEndPoint
         switch($configuration)
         {
             "sand" { $dnsConfiguration = "sandbox" }
-            "pprod" { $dnsConfiguration = "preprod" }
+            "prep" { $dnsConfiguration = "preprod" }
+            "prod" { $dnsConfiguration = "production" }
             default { $dnsConfiguration = $configuration }
         }
 
@@ -114,6 +115,7 @@ function New-FabricEndPoint
                                             Region = $region;}
         }
 
+        $probe = $null
         try { $probe = ($lb.Probes | ? { $_.Name -eq $Name })[0] } catch {}
 
         if($probe -and $Force.IsPresent) {
@@ -133,6 +135,7 @@ function New-FabricEndPoint
             $lbRefresh = (Get-AzureRmLoadBalancer -Name $lb.Name -ResourceGroupName $lb.ResourceGroupName)
         }
 
+        $rule = $null
         try { $rule = ($lb.LoadBalancingRules | ? { $_.Name -eq $Name })[0] } catch {}
 
         if($rule -and $Force.IsPresent) {
@@ -169,7 +172,7 @@ function New-FabricEndPoint
             switch($configuration)
             {
                 "sand" { $dnsConfiguration = "sandbox" }
-                "pprod" { $dnsConfiguration = "preprod" }
+                "prep" { $dnsConfiguration = "preprod" }
                 "prod" { $dnsConfiguration = "production" }
                 default { $dnsConfiguration = $configuration }
             }
@@ -224,6 +227,7 @@ function New-FabricEndPoint
             $dnsEndpoints += [DnsEndpoint]@{Uri = "$dnsName.$dnsRoot";
                                             Region = $region;}
 
+            $agProbe = $null
             try { $agProbe = ($ag.Probes | ? { $_.Name -eq $Name })[0] } catch {}
 
             if($agProbe -and $Force.IsPresent) {
@@ -244,6 +248,7 @@ function New-FabricEndPoint
                 $agRefresh = Get-AzureRmApplicationGateway -Name $ag.Name -ResourceGroupName $ag.ResourceGroupName
             }
 
+            $listener = $null
             try { $listener = ($ag.HttpListeners | ? { $_.Name -eq $Name })[0] } catch {}
 
             if($listener -and $Force.IsPresent) {
@@ -286,6 +291,7 @@ function New-FabricEndPoint
                 }
             }
 
+            $httpSetting = $null
             try { $httpSetting = ($ag.BackendHttpSettingsCollection | ? { $_.Name -eq $Name })[0] } catch {}
 
             if($httpSetting -and $Force.IsPresent) {
@@ -304,6 +310,7 @@ function New-FabricEndPoint
                 $agRefresh = Get-AzureRmApplicationGateway -Name $ag.Name -ResourceGroupName $ag.ResourceGroupName
             }
 
+            $agRule = $null
             try { $agRule = ($ag.RequestRoutingRules | ? { $_.Name -eq $Name })[0] } catch {}
 
             if($agRule -and $Force.IsPresent) {

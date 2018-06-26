@@ -45,6 +45,7 @@
     <Compile Include="DevOpsFlex.Automation.PowerShell.psm1" />
     <Compile Include="DevOpsFlex.Automation.PowerShell.tests.ps1" />
     <Compile Include="ResizeASMDisk.ps1" />
+    <Compile Include="WebSlots.ps1" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Debug\" />
