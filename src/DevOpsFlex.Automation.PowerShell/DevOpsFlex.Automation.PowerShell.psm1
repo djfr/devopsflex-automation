@@ -9,6 +9,7 @@
 . "$PSScriptRoot\AzureServicesInKeyVault.ps1"
 . "$PSScriptRoot\AzureVNetHelpers.ps1"
 . "$PSScriptRoot\FabricEndpoints.ps1"
+. "$PSScriptRoot\WebSlots.ps1"
 . "$PSScriptRoot\ResizeASMDisk.ps1"
 
 # Export functions
@@ -54,6 +55,9 @@ Export-ModuleMember -Function @(
 
     # FabricEndpoints
     'New-FabricEndPoint'
+
+	# WebSlots
+	'New-WebSlot'
 
     # ResizeASMDisk
     'Set-AzureVMOSDiskSize'
