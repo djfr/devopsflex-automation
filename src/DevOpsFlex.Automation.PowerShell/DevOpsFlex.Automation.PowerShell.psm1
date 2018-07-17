@@ -8,6 +8,10 @@
 . "$PSScriptRoot\AzureSQLHelpers.ps1"
 . "$PSScriptRoot\AzureServicesInKeyVault.ps1"
 . "$PSScriptRoot\AzureVNetHelpers.ps1"
+. "$PSScriptRoot\AzureLoadBalancerHelpers.ps1"
+. "$PSScriptRoot\AzureAppGatewayHelpers.ps1"
+. "$PSScriptRoot\AzureDnsHelpers.ps1"
+. "$PSScriptRoot\AzureTrafficManagerHelpers.ps1"
 . "$PSScriptRoot\FabricEndpoints.ps1"
 . "$PSScriptRoot\WebSlots.ps1"
 . "$PSScriptRoot\ResizeASMDisk.ps1"
@@ -52,6 +56,18 @@ Export-ModuleMember -Function @(
     # AzureVNetHelpers
     'Disconnect-AzureEswNetworkSecurityGroups'
     'Get-AzureAllVNets'
+
+	# AzureLoadBalancerHelpers
+	'New-EswLoadBalancerConfig'
+
+	# AzureAppGatewayHelpers
+	'New-EswApplicationGatewayConfig'
+
+	# AzureDnsHelpers
+	'New-EswDnsEndpoint'
+
+	# AzureTrafficManagerHelpers
+	'New-EswTrafficManagerProfile'
 
     # FabricEndpoints
     'New-FabricEndPoint'
