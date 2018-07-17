@@ -44,380 +44,142 @@ function New-FabricEndPoint
     else {
         $lbs = Get-AzureRmLoadBalancer | ? { $_.Name.ToLower() -match '-lb' }
         $dnsLayerSuffix = ""
-    }
+    }   
 
     $dnsEndpoints = @()
 
+    $lbs[0].Name -match '\w*-(\w*)-\w*-(\w*)-\w*-\w*' > $null
+    $configuration = $Matches[2]
+
+    switch($configuration)
+    {
+        "sand" { $dnsConfiguration = "sandbox" }
+        "prep" { $dnsConfiguration = "preprod" }
+        "prod" { $dnsConfiguration = "production" }
+        default { $dnsConfiguration = $configuration }
+    }
+
+    if($configuration -eq 'prod' -or $configuration -eq 'sand') {
+        $dnsSuffix = 'com'
+    }
+    else {
+        $dnsSuffix = 'net'
+    }
+
+    $dnsZone = "$dnsConfiguration.eshopworld.$dnsSuffix"
+
+    #Load balancers
     foreach($lb in $lbs) {
-
-        ### MOVE THIS INTO IT'S OWN THING
-        # Find the Configuration / DNS record settings
-        $lb.Name -match '\w*-(\w*)-\w*-(\w*)-\w*-\w*' > $null
-        $region = $Matches[1]
-        $configuration = $Matches[2]
-
-        switch($configuration)
-        {
-            "sand" { $dnsConfiguration = "sandbox" }
-            "prep" { $dnsConfiguration = "preprod" }
-            "prod" { $dnsConfiguration = "production" }
-            default { $dnsConfiguration = $configuration }
-        }
-
-        if($configuration -eq 'prod' -or $configuration -eq 'sand') {
-            $dnsSuffix = 'com'
+        if($Force.IsPresent) {
+            New-EswLoadBalancerConfig -LoadBalancerName $lb.Name -ResourceGroupName $lb.ResourceGroupName -Name $Name -Port $Port -Force
         }
         else {
-            $dnsSuffix = 'net'
+            New-EswLoadBalancerConfig -LoadBalancerName $lb.Name -ResourceGroupName $lb.ResourceGroupName -Name $Name -Port $Port
+        }
+
+        if($UseSsl.IsPresent) {
+            $pip = ($lb.FrontendIpConfigurations)[0].PrivateIpAddress
+        }
+        else {
+            $pipRes = $null
+            $pipRes = Get-AzureRmResource -ResourceId ($lb.FrontendIpConfigurations[0].PublicIpAddress.Id)
+            $pip = (Get-AzureRmPublicIpAddress -Name $pipRes.ResourceName -ResourceGroupName $pipRes.ResourceGroupName).IpAddress
         }
 
         if($lbs.Count -gt 1) {
+            $lb.Name -match '\w*-(\w*)-\w*-(\w*)-\w*-\w*' > $null
+            $region = $Matches[1]
             $dnsName = "$Name-$region$dnsLayerSuffix"
         }
         else {
             $dnsName = "$Name$dnsLayerSuffix"
         }
-        ###
 
-        # Find the public IP address of the load balancer
-        if($UseSsl.IsPresent) {
-            $pip = ($lb.FrontendIpConfigurations)[0].PrivateIpAddress
+        if($Force.IsPresent) {
+            New-EswDnsEndpoint -DnsName $dnsName -ResourceGroupName "global-platform-$configuration" -DnsZone $dnsZone -IpAddress $pip -Force
         }
         else {
-            $pipRes = Get-AzureRmResource -ResourceId ($lb.FrontendIpConfigurations[0].PublicIpAddress.Id)
-            $pip = (Get-AzureRmPublicIpAddress -Name $pipRes.ResourceName -ResourceGroupName $pipRes.ResourceGroupName).IpAddress
-        }
-
-        $dnsRoot = "$dnsConfiguration.eshopworld.$dnsSuffix"
-
-        $existingDns = Get-AzureRmDnsRecordSet -Name "$dnsName" `
-                                               -RecordType A `
-                                               -ZoneName $dnsRoot `
-                                               -ResourceGroupName "global-platform-$configuration" `
-                                               -ErrorAction SilentlyContinue
-
-        if(($existingDns -ne $null) -and $Force.IsPresent) {
-            $existingDns | Remove-AzureRmDnsRecordSet -Confirm:$False -Overwrite
-            $existingDns = $null
-        }
-
-        if($existingDns -eq $null) {
-            New-AzureRmDnsRecordSet -Name "$dnsName" `
-                                    -RecordType A `
-                                    -ZoneName $dnsRoot `
-                                    -ResourceGroupName "global-platform-$configuration" `
-                                    -Ttl 360 `
-                                    -DnsRecords (New-AzureRmDnsRecordConfig -IPv4Address "$pip") > $null
-        }
+            New-EswDnsEndpoint -DnsName $dnsName -ResourceGroupName "global-platform-$configuration" -DnsZone $dnsZone -IpAddress $pip
+        }  
 
         if(-not $UseSsl.IsPresent) {
-            $dnsEndpoints += [DnsEndpoint]@{Uri = "$dnsName.$dnsRoot";
-                                            Region = $region;}
-        }
-
-        $probe = $null
-        try { $probe = ($lb.Probes | ? { $_.Name -eq $Name })[0] } catch {}
-
-        if($probe -and $Force.IsPresent) {
-            $lb | Remove-AzureRmLoadBalancerProbeConfig -Name $probe.Name | Set-AzureRmLoadBalancer > $null
-            $probe = $null
-        }
-        $lbRefresh = (Get-AzureRmLoadBalancer -Name $lb.Name -ResourceGroupName $lb.ResourceGroupName)
-
-        if($probe -eq $null) {
-            $lbRefresh | Add-AzureRmLoadBalancerProbeConfig -Name "$Name" `
-                                                            -Protocol Http `
-                                                            -Port $Port `
-                                                            -RequestPath $ProbePath `
-                                                            -IntervalInSeconds 30 `
-                                                            -ProbeCount 2 > $null
-            $lbRefresh | Set-AzureRmLoadBalancer > $null
-            $lbRefresh = (Get-AzureRmLoadBalancer -Name $lb.Name -ResourceGroupName $lb.ResourceGroupName)
-        }
-
-        $rule = $null
-        try { $rule = ($lb.LoadBalancingRules | ? { $_.Name -eq $Name })[0] } catch {}
-
-        if($rule -and $Force.IsPresent) {
-            $lbRefresh | Remove-AzureRmLoadBalancerRuleConfig -Name $rule.Name | Set-AzureRmLoadBalancer > $null
-            $rule = $null
-        }
-        $lbRefresh = (Get-AzureRmLoadBalancer -Name $lb.Name -ResourceGroupName $lb.ResourceGroupName)
-
-        if($rule -eq $null) {
-            $lbRefresh | Add-AzureRmLoadBalancerRuleConfig -Name "$Name" `
-                                                           -Protocol Tcp `
-                                                           -ProbeId ($lbRefresh.Probes | ? { $_.Name -eq $Name})[0].Id `
-                                                           -FrontendPort $Port `
-                                                           -BackendPort $Port `
-                                                           -FrontendIpConfigurationId $lbRefresh.FrontendIpConfigurations[0].Id `
-                                                           -BackendAddressPoolId $lbRefresh.BackendAddressPools[0].Id > $null
-            $lbRefresh | Set-AzureRmLoadBalancer > $null
-        }
+            $dnsEndpoints += [DnsEndpoint]@{Uri = "$dnsName.$dnsZone";
+                                        Region = $region;}
+        }      
     }
 
-    Write-Host 'Done with LBs'
-
+    #App Gateways
     if($UseSsl.IsPresent) {
         $appGateways = Get-AzureRmApplicationGateway
+        $dnsSuffix = "$dnsConfiguration.eshopworld.$dnsSuffix"
+
+        if ($appGateways.Count -gt 1) {
+            $multiRegion = $true
+        }
 
         foreach($ag in $appGateways) {
-
-            ### MOVE THIS INTO IT'S OWN THING
-
-            $ag.Name -match '\w*-(\w*)-\w*-(\w*)-\w*' > $null
-            $region = $Matches[1]
-            $configuration = $Matches[2]
-
-            switch($configuration)
-            {
-                "sand" { $dnsConfiguration = "sandbox" }
-                "prep" { $dnsConfiguration = "preprod" }
-                "prod" { $dnsConfiguration = "production" }
-                default { $dnsConfiguration = $configuration }
-            }
-
-            if($configuration -eq 'prod' -or $configuration -eq 'sand') {
-                $dnsSuffix = 'com'
-            }
-            else {
-                $dnsSuffix = 'net'
-            }
-
-            if($appGateways.Count -gt 1) {
-                $dnsName = "$Name-$region"
-            }
-            else {
-                $dnsName = "$Name"
-            }
-            ###
-
-            if(($ag.FrontendPorts | ? { $_.Port -eq 443 }).Count -eq 0) {
-                $ag | Add-AzureRmApplicationGatewayFrontendPort -Name 'https-port' -Port 443 | Set-AzureRmApplicationGateway > $null
-            }
-
-            $agRefresh = Get-AzureRmApplicationGateway -Name $ag.Name -ResourceGroupName $ag.ResourceGroupName
-
-            # Find the public IP address of the app gateway
-            $pipRes = Get-AzureRmResource -ResourceId ($ag.FrontendIPConfigurations[0].PublicIPAddress.Id)
-            $pip = (Get-AzureRmPublicIpAddress -Name $pipRes.ResourceName -ResourceGroupName $pipRes.ResourceGroupName).IpAddress
-
-            $dnsRoot = "$dnsConfiguration.eshopworld.$dnsSuffix"
-
-            $existingDns = Get-AzureRmDnsRecordSet -Name "$dnsName" `
-                                                   -RecordType A `
-                                                   -ZoneName $dnsRoot `
-                                                   -ResourceGroupName "global-platform-$configuration" `
-                                                   -ErrorAction SilentlyContinue
-
-            if(($existingDns -ne $null) -and $Force.IsPresent) {
-                $existingDns | Remove-AzureRmDnsRecordSet -Confirm:$False -Overwrite  > $null
-                $existingDns = $null
-            }
-
-            if($existingDns -eq $null) {
-                New-AzureRmDnsRecordSet -Name "$dnsName" `
-                                        -RecordType A `
-                                        -ZoneName $dnsRoot `
-                                        -ResourceGroupName "global-platform-$configuration" `
-                                        -Ttl 360 `
-                                        -DnsRecords (New-AzureRmDnsRecordConfig -IPv4Address "$pip") > $null
-            }
-
-            $dnsEndpoints += [DnsEndpoint]@{Uri = "$dnsName.$dnsRoot";
-                                            Region = $region;}
-
-            $agProbe = $null
-            try { $agProbe = ($ag.Probes | ? { $_.Name -eq $Name })[0] } catch {}
-
-            if($agProbe -and $Force.IsPresent) {
-                $agRefresh | Remove-AzureRmApplicationGatewayProbeConfig -Name $agProbe.Name | Set-AzureRmApplicationGateway > $null
-                $agProbe = $null
-            }
-            $agRefresh = Get-AzureRmApplicationGateway -Name $ag.Name -ResourceGroupName $ag.ResourceGroupName
-
-            if($agProbe -eq $null) {
-                $agRefresh | Add-AzureRmApplicationGatewayProbeConfig -Name "$Name" `
-                                                               -Protocol Http `
-                                                               -HostName "$dnsName-lb.$dnsConfiguration.eshopworld.$dnsSuffix" `
-                                                               -Path "$ProbePath" `
-                                                               -Interval 30 `
-                                                               -Timeout 120 `
-                                                               -UnhealthyThreshold 2 > $null
-                $agRefresh | Set-AzureRmApplicationGateway > $null
-                $agRefresh = Get-AzureRmApplicationGateway -Name $ag.Name -ResourceGroupName $ag.ResourceGroupName
-            }
-
-            $listener = $null
-            try { $listener = ($ag.HttpListeners | ? { $_.Name -eq $Name })[0] } catch {}
-
-            if($listener -and $Force.IsPresent) {
-                $agRefresh | Remove-AzureRmApplicationGatewayHttpListener -Name $listener.Name | Set-AzureRmApplicationGateway > $null
-                $listener = $null
-            }
-            $agRefresh = Get-AzureRmApplicationGateway -Name $ag.Name -ResourceGroupName $ag.ResourceGroupName
-
-            if($listener -eq $null) {
-                $agRefresh | Add-AzureRmApplicationGatewayHttpListener -Name "$Name" `
-                                                                       -Protocol "Https" `
-                                                                       -SslCertificate ($agRefresh.SslCertificates | ? { $_.Name -eq "star.$dnsConfiguration.eshopworld.$dnsSuffix" })[0] `
-                                                                       -FrontendIPConfiguration ($agRefresh.FrontendIPConfigurations)[0] `
-                                                                       -FrontendPort ($agRefresh.FrontendPorts | ? { $_.Port -eq 443 })[0] `
-                                                                       -HostName "$dnsName.$dnsConfiguration.eshopworld.$dnsSuffix" > $null
-                $agRefresh | Set-AzureRmApplicationGateway > $null
-                $agRefresh = Get-AzureRmApplicationGateway -Name $ag.Name -ResourceGroupName $ag.ResourceGroupName
-            }
-
-            ## multiple regions - need to create top dns listener because TM will be there
-            if($appGateways.Count -gt 1) {
-                $listener = $null
-                try { $listener = ($ag.HttpListeners | ? { $_.Name -eq "$Name-tm" })[0] } catch {}
-
-                if($listener -and $Force.IsPresent) {
-                    $agRefresh | Remove-AzureRmApplicationGatewayHttpListener -Name $listener.Name | Set-AzureRmApplicationGateway > $null
-                    $listener = $null
+            if ($multiRegion) {
+                if($force.IsPresent) {
+                    New-EswApplicationGatewayConfig -AppGatewayName $ag.Name -ResourceGroupName $ag.ResourceGroupName -Name $Name -Port $Port -DnsName $dnsName -DnsSuffix $dnsSuffix -IsMultiRegion -Force
                 }
-                $agRefresh = Get-AzureRmApplicationGateway -Name $ag.Name -ResourceGroupName $ag.ResourceGroupName
-
-                if($listener -eq $null) {
-                    $agRefresh | Add-AzureRmApplicationGatewayHttpListener -Name "$Name-tm" `
-                                                                           -Protocol "Https" `
-                                                                           -SslCertificate ($agRefresh.SslCertificates | ? { $_.Name -eq "star.$dnsConfiguration.eshopworld.$dnsSuffix" })[0] `
-                                                                           -FrontendIPConfiguration ($agRefresh.FrontendIPConfigurations)[0] `
-                                                                           -FrontendPort ($agRefresh.FrontendPorts | ? { $_.Port -eq 443 })[0] `
-                                                                           -HostName "$Name.$dnsConfiguration.eshopworld.$dnsSuffix" > $null
-                    $agRefresh | Set-AzureRmApplicationGateway > $null
-                    $agRefresh = Get-AzureRmApplicationGateway -Name $ag.Name -ResourceGroupName $ag.ResourceGroupName
+                else {
+                    New-EswApplicationGatewayConfig -AppGatewayName $ag.Name -ResourceGroupName $ag.ResourceGroupName -Name $Name -Port $Port -DnsName $dnsName -DnsSuffix $dnsSuffix -IsMultiRegion
                 }
-            }
-
-            $httpSetting = $null
-            try { $httpSetting = ($ag.BackendHttpSettingsCollection | ? { $_.Name -eq $Name })[0] } catch {}
-
-            if($httpSetting -and $Force.IsPresent) {
-                $agRefresh | Remove-AzureRmApplicationGatewayBackendHttpSettings -Name $httpSetting.Name | Set-AzureRmApplicationGateway > $null
-                $httpSetting = $null
-            }
-            $agRefresh = Get-AzureRmApplicationGateway -Name $ag.Name -ResourceGroupName $ag.ResourceGroupName
-
-            if($httpSetting -eq $null) {
-                $agRefresh | Add-AzureRmApplicationGatewayBackendHttpSettings -Name "$Name" `
-                                                                              -Port $Port `
-                                                                              -Protocol "HTTP" `
-                                                                              -Probe ($agRefresh.Probes | ? { $_.Name -eq $Name})[0] `
-                                                                              -CookieBasedAffinity "Disabled" > $null
-                $agRefresh | Set-AzureRmApplicationGateway > $null
-                $agRefresh = Get-AzureRmApplicationGateway -Name $ag.Name -ResourceGroupName $ag.ResourceGroupName
-            }
-
-            $agRule = $null
-            try { $agRule = ($ag.RequestRoutingRules | ? { $_.Name -eq $Name })[0] } catch {}
-
-            if($agRule -and $Force.IsPresent) {
-                $agRefresh | Remove-AzureRmApplicationGatewayRequestRoutingRule -Name $agRule.Name | Set-AzureRmApplicationGateway > $null
-                $agRule = $null
-            }
-            $agRefresh = Get-AzureRmApplicationGateway -Name $ag.Name -ResourceGroupName $ag.ResourceGroupName
-
-            if($agRule -eq $null) {
-                $agRefresh | Add-AzureRmApplicationGatewayRequestRoutingRule -Name $Name `
-                                                                             -RuleType Basic `
-                                                                             -BackendHttpSettings ($agRefresh.BackendHttpSettingsCollection | ? { $_.Name -eq $Name })[0] `
-                                                                             -HttpListener ($agRefresh.HttpListeners | ? { $_.Name -eq $Name })[0] `
-                                                                             -BackendAddressPool ($agRefresh.BackendAddressPools)[0] > $null
-                $agRefresh | Set-AzureRmApplicationGateway > $null
-            }
-
-            ## multiple regions - need to create top dns rule because TM will be there
-            if($appGateways.Count -gt 1) {
-                $agRule = $null
-                try { $agRule = ($ag.RequestRoutingRules | ? { $_.Name -eq "$Name-tm" })[0] } catch {}
-
-                if($agRule -and $Force.IsPresent) {
-                    $agRefresh | Remove-AzureRmApplicationGatewayRequestRoutingRule -Name $agRule.Name | Set-AzureRmApplicationGateway > $null
-                    $agRule = $null
+                
+            }else {
+                if($force.IsPresent) {
+                    New-EswApplicationGatewayConfig -AppGatewayName $ag.Name -ResourceGroupName $ag.ResourceGroupName -Name $Name -Port $Port -DnsName $dnsName -DnsSuffix $dnsSuffix -Force
                 }
-                $agRefresh = Get-AzureRmApplicationGateway -Name $ag.Name -ResourceGroupName $ag.ResourceGroupName
-
-                if($agRule -eq $null) {
-                    $agRefresh | Add-AzureRmApplicationGatewayRequestRoutingRule -Name "$Name-tm" `
-                                                                                 -RuleType Basic `
-                                                                                 -BackendHttpSettings ($agRefresh.BackendHttpSettingsCollection | ? { $_.Name -eq $Name })[0] `
-                                                                                 -HttpListener ($agRefresh.HttpListeners | ? { $_.Name -eq "$Name-tm" })[0] `
-                                                                                 -BackendAddressPool ($agRefresh.BackendAddressPools)[0] > $null
-                    $agRefresh | Set-AzureRmApplicationGateway > $null
+                else {
+                    New-EswApplicationGatewayConfig -AppGatewayName $ag.Name -ResourceGroupName $ag.ResourceGroupName -Name $Name -Port $Port -DnsName $dnsName -DnsSuffix $dnsSuffix
                 }
-            }
+            }            
         }
 
-        Write-Host 'Done with AGs'
+        $pipRes = Get-AzureRmResource -ResourceId ($ag.FrontendIPConfigurations[0].PublicIPAddress.Id)
+        $pip = (Get-AzureRmPublicIpAddress -Name $pipRes.ResourceName -ResourceGroupName $pipRes.ResourceGroupName).IpAddress
+
+        if($appGateways.Count -gt 1) {
+            $appGatewway.Name -match '\w*-(\w*)-\w*-(\w*)-\w*-\w*' > $null
+            $region = $Matches[1]
+            $dnsName = "$Name-$region"
+        }
+        else {
+            $dnsName = "$Name"
+        }
+
+        if($Force.IsPresent) {
+            New-EswDnsEndpoint -DnsName $dnsName -ResourceGroupName "global-platform-$configuration" -DnsZone $dnsZone -IpAddress $pip -Force
+        }
+        else {
+            New-EswDnsEndpoint -DnsName $dnsName -ResourceGroupName "global-platform-$configuration" -DnsZone $dnsZone -IpAddress $pip
+        }  
+
+        $dnsEndpoints += [DnsEndpoint]@{Uri = "$dnsName.$dnsZone";
+                                Region = $region;}
     }
 
-    if($dnsEndpoints.Count -gt 1) {
+    #Traffic Manager
+
+    if($dnsEndpoints.Count -gt 1) {        
         $tmDnsPrefix = "esw-$Name-$configuration"
+        $tmDns = "$tmDnsPrefix.trafficmanager.net"
+        $rgName = "global-platform-$configuration"
 
-        $existingDns = Get-AzureRmDnsRecordSet -Name "$Name" `
-                                               -RecordType CNAME `
-                                               -ZoneName $dnsRoot `
-                                               -ResourceGroupName "global-platform-$configuration" `
-                                               -ErrorAction SilentlyContinue
-
-        if(($existingDns -ne $null) -and $Force.IsPresent) {
-            $existingDns | Remove-AzureRmDnsRecordSet -Confirm:$False -Overwrite  > $null
-            $existingDns = $null
-        }
-
-        if($existingDns -eq $null) {
-            New-AzureRmDnsRecordSet -Name "$Name" `
-                                    -RecordType CNAME `
-                                    -ZoneName $dnsRoot `
-                                    -ResourceGroupName "global-platform-$configuration" `
-                                    -Ttl 30 `
-                                    -DnsRecords (New-AzureRmDnsRecordConfig -Cname "$tmDnsPrefix.trafficmanager.net") > $null
-        }
-
-        if($UseSsl.IsPresent) {
+        if($UseSsl.IsPresent){
             $tmPort = 443
-            $monitorProtocol = "HTTPS"
         }
         else {
             $tmPort = $Port
-            $monitorProtocol = "HTTP"
         }
 
-        $profile = Get-AzureRmTrafficManagerProfile -Name $Name `
-                                                    -ResourceGroupName "global-platform-$configuration" `
-                                                    -ErrorAction SilentlyContinue
-
-        if(-not $profile) {
-            $profile = New-AzureRmTrafficManagerProfile -Name $Name `
-                                                        -ResourceGroupName "global-platform-$configuration" `
-                                                        -TrafficRoutingMethod Performance `
-                                                        -RelativeDnsName $tmDnsPrefix `
-                                                        -Ttl 30 `
-                                                        -MonitorProtocol $monitorProtocol `
-                                                        -MonitorPort $tmPort `
-                                                        -MonitorPath $ProbePath `
-                                                        -MonitorIntervalInSeconds 10 `
-                                                        -MonitorTimeoutInSeconds 9 `
-                                                        -MonitorToleratedNumberOfFailures 2
+        if($Force.IsPresent) {
+            New-EswDnsEndpoint -DnsName $Name -ResourceGroupName $rgName -DnsZone $dnsZone -RecordType CNAME -CName $tmDns -Force
+            New-EswTrafficManagerProfile -Name $Name -ResourceGroupName $rgName -DnsPrefix $tmDnsPrefix -DnsEndpoints $dnsEndpoints -Port $tmPort -Force
         }
-
-        foreach($endpoint in $dnsEndpoints) {
-            $tmEndpoints = $profile.Endpoints | ? { $_.Name -eq "$($endpoint.Region)-endpoint" }
-
-            if($tmEndpoints.Count -eq 0) {
-                $profile | Add-AzureRmTrafficManagerEndpointConfig -EndpointName "$($endpoint.Region)-endpoint" `
-                                                                   -Type ExternalEndpoints `
-                                                                   -Target $endpoint.Uri `
-                                                                   -EndpointLocation $endpoint.GetRegionName() `
-                                                                   -EndpointStatus Enabled > $null
-            }
-        }
-
-        $profile | Set-AzureRmTrafficManagerProfile > $null
+        else {
+            New-EswDnsEndpoint -DnsName $Name -ResourceGroupName $rgName -DnsZone $dnsZone -RecordType CNAME -CName $tmDns
+            New-EswTrafficManagerProfile -Name $Name -ResourceGroupName $rgName -DnsPrefix $tmDnsPrefix -DnsEndpoints $dnsEndpoints -Port $tmPort
+        } 
     }
-
-    Write-Host 'Done with TM'
-    Write-Host 'Done with everything'
 }

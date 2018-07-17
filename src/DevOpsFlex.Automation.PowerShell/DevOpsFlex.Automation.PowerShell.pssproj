@@ -27,6 +27,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="AzureAppGatewayHelpers.ps1" />
+    <Compile Include="AzureDnsHelpers.ps1" />
+    <Compile Include="AzureLoadBalancerHelpers.ps1" />
+    <Compile Include="AzureTrafficManagerHelpers.ps1" />
     <Compile Include="FabricEndpoints.ps1" />
     <Compile Include="AutorestCreateProject.ps1" />
     <Compile Include="AzureSQLHelpers.ps1" />
