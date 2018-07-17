@@ -108,10 +108,7 @@ function New-FabricEndPoint
         }      
     }
 
-    Write-Host 'Done with LBs'
-
     #App Gateways
-
     if($UseSsl.IsPresent) {
         $appGateways = Get-AzureRmApplicationGateway
         $dnsSuffix = "$dnsConfiguration.eshopworld.$dnsSuffix"
@@ -160,8 +157,6 @@ function New-FabricEndPoint
 
         $dnsEndpoints += [DnsEndpoint]@{Uri = "$dnsName.$dnsZone";
                                 Region = $region;}
-
-        Write-Host 'Done with AGs'
     }
 
     #Traffic Manager
@@ -187,7 +182,4 @@ function New-FabricEndPoint
             New-EswTrafficManagerProfile -Name $Name -ResourceGroupName $rgName -DnsPrefix $tmDnsPrefix -DnsEndpoints $dnsEndpoints -Port $tmPort
         } 
     }
-
-    Write-Host 'Done with TM'    
-    Write-Host 'Done with everything'
 }
