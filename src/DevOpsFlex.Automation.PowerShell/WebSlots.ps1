@@ -33,6 +33,14 @@ function New-WebSlot
 
     #DNS
 
+    switch($configuration)
+    {
+        "sand" { $dnsConfiguration = "sandbox" }
+        "prep" { $dnsConfiguration = "preprod" }
+        "prod" { $dnsConfiguration = "production" }
+        default { $dnsConfiguration = $configuration }
+    }
+
     if($configuration -eq 'prod' -or $configuration -eq 'sand') {
         $dnsSuffix = 'com'
     }
@@ -40,17 +48,17 @@ function New-WebSlot
         $dnsSuffix = 'net'
     }
 
-    $dnsRoot = "$configuration.eshopworld.$dnsSuffix"
+    $dnsRoot = "$dnsConfiguration.eshopworld.$dnsSuffix"
     $dnsZone = Get-AzureRmDnsZone -ResourceGroupName $rg -Name $dnsRoot
     $dnsHostName = "$Name.$dnsRoot"
     $cdnHostName = "$fullName.azureedge.net"  
     
-    $dns = Get-AzureRmDnsRecordSet -Name $Name -Zone $dnsZone -RecordType CNAME   
+    $dns = Get-AzureRmDnsRecordSet -Name $Name -Zone $dnsZone -RecordType CNAME -ErrorAction SilentlyContinue   
 
     if($dns -eq $null) {
         New-AzureRmDnsRecordSet -Name $Name -Zone $dnsZone -Ttl 360 -RecordType CNAME -DnsRecords (New-AzureRmDnsRecordConfig -Cname $cdnHostName)
     }elseif($Force.IsPresent) {
-        Remove-AzureRmDnsRecordSet -Name $Name -Zone $dnsZone -RecordType CNAME -Force
+        Remove-AzureRmDnsRecordSet -Name $Name -Zone $dnsZone -RecordType CNAME -Confirm:$false
         New-AzureRmDnsRecordSet -Name $Name -Zone $dnsZone -Ttl 360 -RecordType CNAME -DnsRecords (New-AzureRmDnsRecordConfig -Cname $cdnHostName)
     }  
 
@@ -63,11 +71,12 @@ function New-WebSlot
     $appServiceHostName = "$fullName.azurewebsites.net"    
 
     if($cdnEndpoint -eq $null) {
-        $cdnEndpoint = New-AzureRmCdnEndpoint -CdnProfile $cdnProfile -EndpointName $fullName -OriginHostName $appServiceHostName -OriginHostHeader $appServiceHostName -OriginName "AzureWebsites" -QueryStringCachingBehavior BypassCaching
-
+        $cdnEndpoint = New-AzureRmCdnEndpoint -CdnProfile $cdnProfile -EndpointName $fullName -OriginHostName $appServiceHostName -OriginHostHeader $appServiceHostName -OriginName "AzureWebsites"
         $customDomain = New-AzureRmCdnCustomDomain -CdnEndpoint $cdnEndpoint -HostName $dnsHostName -CustomDomainName "eshopworld"
-
     }elseif ($Force.IsPresent) {
         Remove-AzureRmCdnEndpoint -EndpointName $fullName -ProfileName $cdnProfile.Name -ResourceGroupName $rg -Confirm:$false
+        
+        $cdnEndpoint = New-AzureRmCdnEndpoint -CdnProfile $cdnProfile -EndpointName $fullName -OriginHostName $appServiceHostName -OriginHostHeader $appServiceHostName -OriginName "AzureWebsites"
+        $customDomain = New-AzureRmCdnCustomDomain -CdnEndpoint $cdnEndpoint -HostName $dnsHostName -CustomDomainName "eshopworld"
     }  
 }
