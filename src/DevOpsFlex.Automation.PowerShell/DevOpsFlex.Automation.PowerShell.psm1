@@ -57,24 +57,24 @@ Export-ModuleMember -Function @(
     'Disconnect-AzureEswNetworkSecurityGroups'
     'Get-AzureAllVNets'
 
-	# AzureLoadBalancerHelpers
-	'New-EswLoadBalancerConfig'
+    # AzureLoadBalancerHelpers
+    'New-EswLoadBalancerConfig'
 
-	# AzureAppGatewayHelpers
-	'New-EswApplicationGatewayConfig'
+    # AzureAppGatewayHelpers
+    'New-EswApplicationGatewayConfig'
 
-	# AzureDnsHelpers
-	'New-EswDnsEndpoint'
+    # AzureDnsHelpers
+    'New-EswDnsEndpoint'
 
-	# AzureTrafficManagerHelpers
-	'New-EswTrafficManagerProfile'
+    # AzureTrafficManagerHelpers
+    'New-EswTrafficManagerProfile'
 
-	# FabricEndpoints
-	'New-FabricEndPoint'
+    # FabricEndpoints
+    'New-FabricEndPoint'
 
-	# WebSlots
-	'New-WebSlot'
+    # WebSlots
+    'New-WebSlot'
 
-	# ResizeASMDisk
-	'Set-AzureVMOSDiskSize'
+    # ResizeASMDisk
+    'Set-AzureVMOSDiskSize'
 )
