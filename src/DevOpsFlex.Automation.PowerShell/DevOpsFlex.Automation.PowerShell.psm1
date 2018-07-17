@@ -69,12 +69,12 @@ Export-ModuleMember -Function @(
 	# AzureTrafficManagerHelpers
 	'New-EswTrafficManagerProfile'
 
-    # FabricEndpoints
-    'New-FabricEndPoint'
+	# FabricEndpoints
+	'New-FabricEndPoint'
 
 	# WebSlots
 	'New-WebSlot'
 
-    # ResizeASMDisk
-    'Set-AzureVMOSDiskSize'
+	# ResizeASMDisk
+	'Set-AzureVMOSDiskSize'
 )
