@@ -37,21 +37,21 @@ Configures rules on load balancers.
     [CmdletBinding()]
     param
     (
-		[parameter(Mandatory=$true, Position=0)]
-		[string] $LoadBalancerName,
+        [parameter(Mandatory=$true, Position=0)]
+        [string] $LoadBalancerName,
 
-		[parameter(Mandatory=$true, Position=1)]
-		[string] $ResourceGroupName,
+        [parameter(Mandatory=$true, Position=1)]
+        [string] $ResourceGroupName,
 
-		[parameter(Mandatory=$true, Position=2)]
-		[string] $Name,
+        [parameter(Mandatory=$true, Position=2)]
+        [string] $Name,
 
-		[parameter(Mandatory=$true, Position=3)]
-		[string] $Port,
+        [parameter(Mandatory=$true, Position=3)]
+        [string] $Port,
 
-		[string] $ProbePath = "/Probe",
+        [string] $ProbePath = "/Probe",
 
-		[switch] $Force
+        [switch] $Force
     )
    
     $lbRefresh = Get-AzureRmLoadBalancer -Name $LoadBalancerName -ResourceGroupName $ResourceGroupName

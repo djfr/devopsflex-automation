@@ -48,29 +48,29 @@ Configures rules on application gateways.
     [CmdletBinding()]
     param
     (
-		[parameter(Mandatory=$true, Position=0)]
-		[string] $AppGatewayName,
+        [parameter(Mandatory=$true, Position=0)]
+        [string] $AppGatewayName,
 
-		[parameter(Mandatory=$true, Position=1)]
-		[string] $ResourceGroupName,
+        [parameter(Mandatory=$true, Position=1)]
+        [string] $ResourceGroupName,
 
-		[parameter(Mandatory=$true, Position=2)]
-		[string] $Name,
+        [parameter(Mandatory=$true, Position=2)]
+        [string] $Name,
 
-		[parameter(Mandatory=$true, Position=3)]
-		[string] $Port,
+        [parameter(Mandatory=$true, Position=3)]
+        [string] $Port,
 
-		[parameter(Mandatory=$true, Position=4)]
-		[string] $DnsName,
+        [parameter(Mandatory=$true, Position=4)]
+        [string] $DnsName,
 
-		[parameter(Mandatory=$true, Position=5)]
-		[string] $DnsSuffix,
+        [parameter(Mandatory=$true, Position=5)]
+        [string] $DnsSuffix,
 
-		[string] $ProbePath = "/Probe",
+        [string] $ProbePath = "/Probe",
         
-		[switch] $IsMultiRegion,
+        [switch] $IsMultiRegion,
 
-		[switch] $Force
+        [switch] $Force
     )
 
     $agRefresh = Get-AzureRmApplicationGateway -Name $AppGatewayName -ResourceGroupName $ResourceGroupName
