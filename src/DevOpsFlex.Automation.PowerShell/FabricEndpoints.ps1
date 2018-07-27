@@ -139,11 +139,19 @@ function New-FabricEndPoint
                 $ag = $appGateways | ? { $_.HttpListeners.Count -lt 2 } | Select-Object -First 1
 
                 Add-EswApplicationGatewayCertificate -AppGatewayName $ag.Name -ResourceGroupName $rg.ResourceGroupName
-            }            
+            }    
+
+            if($multiRegion) {
+                $dnsName = "$Name-$region"
+            }
+            else {
+                $dnsName = "$Name"
+            }        
 
             if($listener -ne $null -and $Force.IsPresent) {
                 #Remove and re-add config
-                $ag = $appGateways | ? { $listener[0].Id.Contains($_.Name) }
+                $listenerAgName = $listener.id.Split('/') | ? { $_ -match '(esw-)\w*-(fabric-)\w*(-ag)(-\d+)?' }
+                $ag = $appGateways | ? { $_.Name -eq $listenerAgName }
                 
                 if ($multiRegion) {
                     New-EswApplicationGatewayConfig -AppGatewayName $ag.Name -ResourceGroupName $ag.ResourceGroupName -Name "$Name" -Port $Port -DnsName $dnsName -DnsSuffix $dnsZone -IsMultiRegion -Force
@@ -160,14 +168,7 @@ function New-FabricEndPoint
             }         
 
             $pipRes = Get-AzureRmResource -ResourceId ($ag.FrontendIPConfigurations[0].PublicIPAddress.Id)
-            $pip = (Get-AzureRmPublicIpAddress -Name $pipRes.ResourceName -ResourceGroupName $pipRes.ResourceGroupName).IpAddress
-
-            if($multiRegion) {
-                $dnsName = "$Name-$region"
-            }
-            else {
-                $dnsName = "$Name"
-            }
+            $pip = (Get-AzureRmPublicIpAddress -Name $pipRes.ResourceName -ResourceGroupName $pipRes.ResourceGroupName).IpAddress            
 
             if($Force.IsPresent) {
                 New-EswDnsEndpoint -DnsName $dnsName -ResourceGroupName "global-platform-$environment" -DnsZone $dnsZone -IpAddress $pip -Force

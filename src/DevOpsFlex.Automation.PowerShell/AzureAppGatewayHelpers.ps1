@@ -102,13 +102,13 @@ Configures rules on application gateways.
     try { $agRule = ($agRefresh.RequestRoutingRules | ? { $_.Name -eq $Name })[0] } catch {}
 
     if($agProbe -or $agListener -or $agTmListener -or $agHttpSetting -or $agTmRule -or $agRule -and $Force.IsPresent) {
-        $agRefresh | Remove-AzureRmApplicationGatewayRequestRoutingRule -Name $agRule.Name `
-                    | Remove-AzureRmApplicationGatewayRequestRoutingRule -Name $agTmRule.Name `
-                    | Remove-AzureRmApplicationGatewayBackendHttpSettings -Name $agHttpSetting.Name `
-                    | Remove-AzureRmApplicationGatewayHttpListener -Name $agTmListener.Name `
-                    | Remove-AzureRmApplicationGatewayHttpListener -Name $agListener.Name `
-                    | Remove-AzureRmApplicationGatewayProbeConfig -Name $agProbe.Name `
-                    | Set-AzureRmApplicationGateway > $null
+        Remove-AzureRmApplicationGatewayRequestRoutingRule -ApplicationGateway $agRefresh -Name $agRule.Name -ErrorAction SilentlyContinue > $null
+        Remove-AzureRmApplicationGatewayRequestRoutingRule -ApplicationGateway $agRefresh -Name $agTmRule.Name -ErrorAction SilentlyContinue > $null
+        Remove-AzureRmApplicationGatewayBackendHttpSettings -ApplicationGateway $agRefresh -Name $agHttpSetting.Name -ErrorAction SilentlyContinue > $null
+        Remove-AzureRmApplicationGatewayHttpListener -ApplicationGateway $agRefresh -Name $agTmListener.Name -ErrorAction SilentlyContinue > $null
+        Remove-AzureRmApplicationGatewayHttpListener -ApplicationGateway $agRefresh -Name $agListener.Name -ErrorAction SilentlyContinue > $null
+        Remove-AzureRmApplicationGatewayProbeConfig -ApplicationGateway $agRefresh -Name $agProbe.Name -ErrorAction SilentlyContinue > $null
+        $agRefresh | Set-AzureRmApplicationGateway > $null
         
         $agProbe = $null
         $agListener = $null
@@ -124,7 +124,7 @@ Configures rules on application gateways.
     if($agProbe -eq $null) {
         $agRefresh | Add-AzureRmApplicationGatewayProbeConfig -Name "$Name" `
                                                         -Protocol Http `
-                                                        -HostName "$DnsName.$DnsSuffix" `
+                                                        -HostName "$DnsName-lb.$DnsSuffix" `
                                                         -Path "$ProbePath" `
                                                         -Interval 30 `
                                                         -Timeout 120 `
