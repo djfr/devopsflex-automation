@@ -249,7 +249,7 @@ function Add-EswApplicationGatewayCertificate
 
     $rg.ResourceGroupName -match '((we|eus|ase|sea)-(platform)-(ci|test|prep|sand|prod))'
     $rgCode = $Matches[2]
-    $env = $Matches[4]
+    $environment = $Matches[4]
 
     if($environment -eq 'prod' -or $environment -eq 'sand') {
         $dnsSuffix = 'com'
@@ -258,11 +258,19 @@ function Add-EswApplicationGatewayCertificate
         $dnsSuffix = 'net'
     }
 
-    $certName = "star.$env.eshopworld.$dnsSuffix"
+    switch($environment)
+    {
+        "sand" { $dnsConfiguration = "sandbox" }
+        "prep" { $dnsConfiguration = "preprod" }
+        "prod" { $dnsConfiguration = "production" }
+        default { $dnsConfiguration = $environment }
+    }
 
-    $kvName = "esw-$rgCode-kv-$env"
+    $certName = "star.$dnsConfiguration.eshopworld.$dnsSuffix"
 
-    $certSecretName = "esw-star-$env-certificate"
+    $kvName = "esw-$rgCode-kv-$environment"
+
+    $certSecretName = "esw-star-$environment-certificate"
 
     $certPwd = (Get-AzureKeyVaultSecret -VaultName $kvName -Name "$certSecretName-pwd").SecretValue
 
@@ -275,6 +283,4 @@ function Add-EswApplicationGatewayCertificate
     Add-AzureRmApplicationGatewaySslCertificate -ApplicationGateway $agRefresh -Name $certName -CertificateFile $certFilePath -Password $certPwd
 
     Set-AzureRmApplicationGateway -ApplicationGateway $agRefresh
-
-    Remove-Item -Path $certFilePath -Force
 }
