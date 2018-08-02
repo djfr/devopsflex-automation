@@ -38,15 +38,14 @@ function New-FabricEndPoint
     )
 
     #Is this a single or multi-region environment?
-    $rgs = Get-AzureRmResourceGroup | ? { $_.ResourceGroupName -match '((we|eus|ase|sea)-(platform)-(ci|test|prep|sand|prod))' }
+    $rgs = Get-AzureRmResourceGroup | ? { $_.ResourceGroupName -match '(\b[a-z]*\b-\bplatform\b-\b[a-z]*\b)' }
 
     if($rgs.Count -gt 1) {
         $multiRegion = $true
     }
 
     #Which environment is this?
-    $rgs[0].ResourceGroupName -match '((we|eus|ase|sea)-(platform)-(ci|test|prep|sand|prod))' > $null
-    $environment = $Matches[4]
+    $environment = $rgs[0].ResourceGroupName.Split("-")[2]
 
     #Environment level variables
     $dnsEndpoints = @()
@@ -70,8 +69,8 @@ function New-FabricEndPoint
 
     #Configure resources for each region in the environment
     foreach($rg in $rgs) {
-        $rg.ResourceGroupName -match '((we|eus|ase|sea)-(platform)-(ci|test|prep|sand|prod))' > $null
-        $region = $Matches[2]
+        $region = $rg.ResourceGroupName.Split("-")[0]
+        if($region -eq 'global'){ continue }
 
         if($UseSsl.IsPresent) {
             $lbs = Get-AzureRmLoadBalancer -ResourceGroupName $rg.ResourceGroupName | ? { $_.Name.ToLower() -match '-ilb' }

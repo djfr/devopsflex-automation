@@ -203,7 +203,7 @@ function New-EswApplicationGateway
     $agName = "esw-$rgCode-fabric-$env-ag-$newIncrement"
     $pipName = "$agName-pip"
 
-    $pip = Get-AzureRmPublicIpAddress -ResourceGroupName $rg.ResourceGroupName -Name $pipName -ErrorAction SilentlyContinue > $null
+    $pip = Get-AzureRmPublicIpAddress -ResourceGroupName $rg.ResourceGroupName -Name $pipName -ErrorAction SilentlyContinue
 
     if($pip -eq $null) {
         New-AzureRmPublicIpAddress -ResourceGroupName $rg.ResourceGroupName -Location $rg.Location -Name $pipName -AllocationMethod Dynamic -DomainNameLabel $agName > $null
@@ -212,20 +212,20 @@ function New-EswApplicationGateway
 
     $agSubnet = (Get-AzureRmVirtualNetwork -ResourceGroupName $rg.ResourceGroupName -Name $rg.ResourceGroupName).Subnets | ? { $_.Name -eq 'app-gateway' }
 
-    $gipconfig = New-AzureRmApplicationGatewayIPConfiguration -Name appGatewayFrontendIP -Subnet $agSubnet > $null
-    $fipconfig = New-AzureRmApplicationGatewayFrontendIPConfig -Name appGatewayFrontendIPConfig -PublicIPAddress $pip > $null
+    $gipconfig = New-AzureRmApplicationGatewayIPConfiguration -Name appGatewayFrontendIP -Subnet $agSubnet
+    $fipconfig = New-AzureRmApplicationGatewayFrontendIPConfig -Name appGatewayFrontendIPConfig -PublicIPAddress $pip
     $frontendport = New-AzureRmApplicationGatewayFrontendPort -Name myFrontendPort -Port 80 > $null
 
     $backendPool = New-AzureRmApplicationGatewayBackendAddressPool -Name $lastAg.BackendAddressPools[0].Name -BackendIPAddresses `
-                                                                            $lastAg.BackendAddressPools[0].BackendAddresses[0].IpAddress > $null
+                                                                            $lastAg.BackendAddressPools[0].BackendAddresses[0].IpAddress
 
-    $poolSettings = New-AzureRmApplicationGatewayBackendHttpSettings -Name appGatewayBackendHttpSettings -Port 80 -Protocol Http -RequestTimeout 30 -CookieBasedAffinity Disabled > $null
+    $poolSettings = New-AzureRmApplicationGatewayBackendHttpSettings -Name appGatewayBackendHttpSettings -Port 80 -Protocol Http -RequestTimeout 30 -CookieBasedAffinity Disabled
 
-    $defaultlistener = New-AzureRmApplicationGatewayHttpListener -Name myAGListener -Protocol Http -FrontendIPConfiguration $fipconfig -FrontendPort $frontendport > $null
+    $defaultlistener = New-AzureRmApplicationGatewayHttpListener -Name myAGListener -Protocol Http -FrontendIPConfiguration $fipconfig -FrontendPort $frontendport
 
-    $frontendRule = New-AzureRmApplicationGatewayRequestRoutingRule -Name rule1 -RuleType Basic -HttpListener $defaultlistener -BackendAddressPool $backendPool -BackendHttpSettings $poolSettings > $null
+    $frontendRule = New-AzureRmApplicationGatewayRequestRoutingRule -Name rule1 -RuleType Basic -HttpListener $defaultlistener -BackendAddressPool $backendPool -BackendHttpSettings $poolSettings
 
-    $sku = New-AzureRmApplicationGatewaySku -Name Standard_Medium -Tier Standard -Capacity 1 > $null
+    $sku = New-AzureRmApplicationGatewaySku -Name Standard_Medium -Tier Standard -Capacity 1
 
     New-AzureRmApplicationGateway -ResourceGroupName $rg.ResourceGroupName -Name $agName -Location $rg.Location -BackendAddressPools $backendPool `
                                     -FrontendIPConfigurations $fipconfig -GatewayIPConfigurations $gipconfig -FrontendPorts $frontendport -HttpListeners $defaultlistener `
