@@ -178,6 +178,23 @@ Configures rules on application gateways.
 
 function New-EswApplicationGateway
 {
+<#
+.SYNOPSIS
+Provisions a new Application Gateway for the eShopworld evolution platform.
+
+.DESCRIPTION
+Provisions a new Application Gateway for the eShopworld evolution platform.
+
+.PARAMETER ResourceGroupName
+The name of the azure resource group that the application gateway will be provisioned to.
+
+.EXAMPLE
+Provisions a new Application Gateway to the 'eus-platform-test' resource group, the new gateway's details and configuration will be defined by the last gateway provisioned to that resource group.
+New-EswApplicationGateway -ResourceGroupName 'eus-platform-test'
+
+.NOTES
+This function assumes you are connected to ARM (Login-AzAccount) and that you are already in the right subscription on ARM.
+#>
     [CmdletBinding()]
     param
     (
@@ -235,6 +252,26 @@ function New-EswApplicationGateway
 
 function Add-EswApplicationGatewayCertificate
 {
+<#
+.SYNOPSIS
+Adds a certificate from Key Vault to an Application Gateway.
+
+.DESCRIPTION
+Adds a certificate from Key Vault to an Application Gateway.
+
+.PARAMETER AppGatewayName
+The name of the application gateway that the certificate will be added to.
+
+.PARAMETER ResourceGroupName
+The name of the azure resource group that the application gateway is in.
+
+.EXAMPLE
+Adds a certificate from the key vault deployed to the 'eus-platform-test' to the application gateway named 'esw-we-fabric-test-ag-01'
+Add-EswApplicationGatewayCertificate -AppGatewayName 'esw-we-fabric-test-ag-01' -ResourceGroupName 'eus-platform-test'
+
+.NOTES
+This function assumes you are connected to ARM (Login-AzAccount) and that you are already in the right subscription on ARM.
+#>
     [CmdletBinding()]
     param
     (
