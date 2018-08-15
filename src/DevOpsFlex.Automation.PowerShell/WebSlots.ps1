@@ -69,27 +69,15 @@ function New-WebSlot
     #CDN
 
     $cdnProfile = Get-AzureRmCdnProfile
-
     $cdnEndpoint = Get-AzureRmCdnEndpoint -CdnProfile $cdnProfile -EndpointName $fullName -ErrorAction SilentlyContinue
-
     $appServiceHostName = "$fullName.azurewebsites.net"    
 
     if($cdnEndpoint -eq $null) {
-        if($environment -eq 'ci' -or $environment -eq 'test') {
-            $cdnEndpoint = New-AzureRmCdnEndpoint -CdnProfile $cdnProfile -EndpointName $fullName -OriginHostName $appServiceHostName -OriginHostHeader $appServiceHostName -OriginName "AzureWebsites" -QueryStringCachingBehavior BypassCaching
-        }else {
-            $cdnEndpoint = New-AzureRmCdnEndpoint -CdnProfile $cdnProfile -EndpointName $fullName -OriginHostName $appServiceHostName -OriginHostHeader $appServiceHostName -OriginName "AzureWebsites"
-        }        
+        $cdnEndpoint = New-AzureRmCdnEndpoint -CdnProfile $cdnProfile -EndpointName $fullName -OriginHostName $appServiceHostName -OriginHostHeader $appServiceHostName -OriginName "AzureWebsites"        
         $customDomain = New-AzureRmCdnCustomDomain -CdnEndpoint $cdnEndpoint -HostName $dnsHostName -CustomDomainName "eshopworld"
-
     }elseif ($Force.IsPresent) {
         Remove-AzureRmCdnEndpoint -EndpointName $fullName -ProfileName $cdnProfile.Name -ResourceGroupName $rg -Confirm:$false
-
-        if($environment -eq 'ci' -or $environment -eq 'test') {
-            $cdnEndpoint = New-AzureRmCdnEndpoint -CdnProfile $cdnProfile -EndpointName $fullName -OriginHostName $appServiceHostName -OriginHostHeader $appServiceHostName -OriginName "AzureWebsites" -QueryStringCachingBehavior BypassCaching
-        }else {
-            $cdnEndpoint = New-AzureRmCdnEndpoint -CdnProfile $cdnProfile -EndpointName $fullName -OriginHostName $appServiceHostName -OriginHostHeader $appServiceHostName -OriginName "AzureWebsites"
-        }        
+        $cdnEndpoint = New-AzureRmCdnEndpoint -CdnProfile $cdnProfile -EndpointName $fullName -OriginHostName $appServiceHostName -OriginHostHeader $appServiceHostName -OriginName "AzureWebsites"       
         $customDomain = New-AzureRmCdnCustomDomain -CdnEndpoint $cdnEndpoint -HostName $dnsHostName -CustomDomainName "eshopworld"
     }  
 }
