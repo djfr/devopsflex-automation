@@ -40,7 +40,7 @@ function New-FabricEndPoint
     #Is this a single or multi-region environment?
     $rgs = Get-AzureRmResourceGroup | ? { $_.ResourceGroupName -match '(\b[a-z]*\b-\bplatform\b-\b[a-z]*\b)' }
 
-    if($rgs.Count -gt 1) {
+    if($rgs.Count -gt 2) {
         $multiRegion = $true
     }
 
