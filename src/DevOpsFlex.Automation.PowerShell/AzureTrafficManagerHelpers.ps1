@@ -60,12 +60,10 @@ Creates and configures traffic manager profiles.
         [switch] $Force
     )
 
-    if($Port) {
-        $tmPort = $Port
+    if(($Port -ne 443)) {
         $monitorProtocol = "HTTP"
     }
     else {
-        $tmPort = 443
         $monitorProtocol = "HTTPS"
     }
 
@@ -83,7 +81,7 @@ Creates and configures traffic manager profiles.
                                                     -RelativeDnsName $DnsPrefix `
                                                     -Ttl 30 `
                                                     -MonitorProtocol $monitorProtocol `
-                                                    -MonitorPort $tmPort `
+                                                    -MonitorPort $Port `
                                                     -MonitorPath $ProbePath `
                                                     -MonitorIntervalInSeconds 10 `
                                                     -MonitorTimeoutInSeconds 9 `

@@ -5,6 +5,13 @@ function New-EswApplicationGatewayConfig
 .SYNOPSIS
 Adds a probe, listener(s), httpSetting and rule(s) to an existing applcation gateway.
 
+.DESCRIPTIONfunction New-EswApplicationGatewayConfig
+{
+<#
+
+.SYNOPSIS
+Adds a probe, listener(s), httpSetting and rule(s) to an existing applcation gateway.
+
 .DESCRIPTION
 Adds a probe, listener(s), httpSetting and rule(s) to an existing applcation gateway.
 In the case of multi-region a second listener and rule is setup for traffic manager.
@@ -95,13 +102,13 @@ Configures rules on application gateways.
     try { $agRule = ($agRefresh.RequestRoutingRules | ? { $_.Name -eq $Name })[0] } catch {}
 
     if($agProbe -or $agListener -or $agTmListener -or $agHttpSetting -or $agTmRule -or $agRule -and $Force.IsPresent) {
-        $agRefresh | Remove-AzureRmApplicationGatewayRequestRoutingRule -Name $agRule.Name `
-                    | Remove-AzureRmApplicationGatewayRequestRoutingRule -Name $agTmRule.Name `
-                    | Remove-AzureRmApplicationGatewayBackendHttpSettings -Name $agHttpSetting.Name `
-                    | Remove-AzureRmApplicationGatewayHttpListener -Name $agTmListener.Name `
-                    | Remove-AzureRmApplicationGatewayHttpListener -Name $agListener.Name `
-                    | Remove-AzureRmApplicationGatewayProbeConfig -Name $agProbe.Name `
-                    | Set-AzureRmApplicationGateway > $null
+        Remove-AzureRmApplicationGatewayRequestRoutingRule -ApplicationGateway $agRefresh -Name $agRule.Name -ErrorAction SilentlyContinue > $null
+        Remove-AzureRmApplicationGatewayRequestRoutingRule -ApplicationGateway $agRefresh -Name $agTmRule.Name -ErrorAction SilentlyContinue > $null
+        Remove-AzureRmApplicationGatewayBackendHttpSettings -ApplicationGateway $agRefresh -Name $agHttpSetting.Name -ErrorAction SilentlyContinue > $null
+        Remove-AzureRmApplicationGatewayHttpListener -ApplicationGateway $agRefresh -Name $agTmListener.Name -ErrorAction SilentlyContinue > $null
+        Remove-AzureRmApplicationGatewayHttpListener -ApplicationGateway $agRefresh -Name $agListener.Name -ErrorAction SilentlyContinue > $null
+        Remove-AzureRmApplicationGatewayProbeConfig -ApplicationGateway $agRefresh -Name $agProbe.Name -ErrorAction SilentlyContinue > $null
+        $agRefresh | Set-AzureRmApplicationGateway > $null
         
         $agProbe = $null
         $agListener = $null
@@ -117,7 +124,7 @@ Configures rules on application gateways.
     if($agProbe -eq $null) {
         $agRefresh | Add-AzureRmApplicationGatewayProbeConfig -Name "$Name" `
                                                         -Protocol Http `
-                                                        -HostName "$DnsName.$DnsSuffix" `
+                                                        -HostName "$DnsName-lb.$DnsSuffix" `
                                                         -Path "$ProbePath" `
                                                         -Interval 30 `
                                                         -Timeout 120 `
@@ -167,4 +174,150 @@ Configures rules on application gateways.
     }
 
     $agRefresh | Set-AzureRmApplicationGateway > $null    
+}
+
+function New-EswApplicationGateway
+{
+<#
+.SYNOPSIS
+Provisions a new Application Gateway for the eShopworld evolution platform.
+
+.DESCRIPTION
+Provisions a new Application Gateway for the eShopworld evolution platform.
+
+.PARAMETER ResourceGroupName
+The name of the azure resource group that the application gateway will be provisioned to.
+
+.EXAMPLE
+Provisions a new Application Gateway to the 'eus-platform-test' resource group, the new gateway's details and configuration will be defined by the last gateway provisioned to that resource group.
+New-EswApplicationGateway -ResourceGroupName 'eus-platform-test'
+
+.NOTES
+This function assumes you are connected to ARM (Login-AzAccount) and that you are already in the right subscription on ARM.
+#>
+    [CmdletBinding()]
+    param
+    (
+        [parameter(Mandatory=$true, Position=0)]
+        [string] $ResourceGroupName  
+    )
+
+    $rg = Get-AzureRmResourceGroup -Name $ResourceGroupName
+
+    $lastAg = Get-AzureRmApplicationGateway -ResourceGroupName $rg.ResourceGroupName | Sort-Object -Property Name | Select-Object -Last 1
+
+    if($lastAg.Name -match '(-ag)$') {
+        $newIncrement = '01'
+    }
+    else {
+        $newIncrement = ([int]($lastAg.Name -replace '\D+(\d+)','$1') + 1).ToString("00")
+    }
+
+    $rg.ResourceGroupName -match '((we|eus|ase|sea)-(platform)-(ci|test|prep|sand|prod))'
+    $rgCode = $Matches[2]
+    $env = $Matches[4]
+
+    $agName = "esw-$rgCode-fabric-$env-ag-$newIncrement"
+    $pipName = "$agName-pip"
+
+    $pip = Get-AzureRmPublicIpAddress -ResourceGroupName $rg.ResourceGroupName -Name $pipName -ErrorAction SilentlyContinue
+
+    if($pip -eq $null) {
+        New-AzureRmPublicIpAddress -ResourceGroupName $rg.ResourceGroupName -Location $rg.Location -Name $pipName -AllocationMethod Dynamic -DomainNameLabel $agName > $null
+        $pip = Get-AzureRmPublicIpAddress -ResourceGroupName $rg.ResourceGroupName -Name $pipName
+    }
+
+    $agSubnet = (Get-AzureRmVirtualNetwork -ResourceGroupName $rg.ResourceGroupName -Name $rg.ResourceGroupName).Subnets | ? { $_.Name -eq 'app-gateway' }
+
+    $gipconfig = New-AzureRmApplicationGatewayIPConfiguration -Name appGatewayFrontendIP -Subnet $agSubnet
+    $fipconfig = New-AzureRmApplicationGatewayFrontendIPConfig -Name appGatewayFrontendIPConfig -PublicIPAddress $pip
+    $frontendport = New-AzureRmApplicationGatewayFrontendPort -Name myFrontendPort -Port 80 > $null
+
+    $backendPool = New-AzureRmApplicationGatewayBackendAddressPool -Name $lastAg.BackendAddressPools[0].Name -BackendIPAddresses `
+                                                                            $lastAg.BackendAddressPools[0].BackendAddresses[0].IpAddress
+
+    $poolSettings = New-AzureRmApplicationGatewayBackendHttpSettings -Name appGatewayBackendHttpSettings -Port 80 -Protocol Http -RequestTimeout 30 -CookieBasedAffinity Disabled
+
+    $defaultlistener = New-AzureRmApplicationGatewayHttpListener -Name myAGListener -Protocol Http -FrontendIPConfiguration $fipconfig -FrontendPort $frontendport
+
+    $frontendRule = New-AzureRmApplicationGatewayRequestRoutingRule -Name rule1 -RuleType Basic -HttpListener $defaultlistener -BackendAddressPool $backendPool -BackendHttpSettings $poolSettings
+
+    $sku = New-AzureRmApplicationGatewaySku -Name Standard_Medium -Tier Standard -Capacity 1
+
+    New-AzureRmApplicationGateway -ResourceGroupName $rg.ResourceGroupName -Name $agName -Location $rg.Location -BackendAddressPools $backendPool `
+                                    -FrontendIPConfigurations $fipconfig -GatewayIPConfigurations $gipconfig -FrontendPorts $frontendport -HttpListeners $defaultlistener `
+                                       -BackendHttpSettingsCollection $poolSettings -RequestRoutingRules $frontendRule -Sku $sku > $null
+
+}
+
+function Add-EswApplicationGatewayCertificate
+{
+<#
+.SYNOPSIS
+Adds a certificate from Key Vault to an Application Gateway.
+
+.DESCRIPTION
+Adds a certificate from Key Vault to an Application Gateway.
+
+.PARAMETER AppGatewayName
+The name of the application gateway that the certificate will be added to.
+
+.PARAMETER ResourceGroupName
+The name of the azure resource group that the application gateway is in.
+
+.EXAMPLE
+Adds a certificate from the key vault deployed to the 'eus-platform-test' to the application gateway named 'esw-we-fabric-test-ag-01'
+Add-EswApplicationGatewayCertificate -AppGatewayName 'esw-we-fabric-test-ag-01' -ResourceGroupName 'eus-platform-test'
+
+.NOTES
+This function assumes you are connected to ARM (Login-AzAccount) and that you are already in the right subscription on ARM.
+#>
+    [CmdletBinding()]
+    param
+    (
+        [parameter(Mandatory=$true, Position=0)]
+        [string] $AppGatewayName,
+
+        [parameter(Mandatory=$true, Position=1)]
+        [string] $ResourceGroupName  
+    )
+
+    $agRefresh = Get-AzureRmApplicationGateway -Name $AppGatewayName -ResourceGroupName $ResourceGroupName
+
+    $rg.ResourceGroupName -match '((we|eus|ase|sea)-(platform)-(ci|test|prep|sand|prod))'
+    $rgCode = $Matches[2]
+    $environment = $Matches[4]
+
+    if($environment -eq 'prod' -or $environment -eq 'sand') {
+        $dnsSuffix = 'com'
+    }
+    else {
+        $dnsSuffix = 'net'
+    }
+
+    switch($environment)
+    {
+        "sand" { $dnsConfiguration = "sandbox" }
+        "prep" { $dnsConfiguration = "preprod" }
+        "prod" { $dnsConfiguration = "production" }
+        default { $dnsConfiguration = $environment }
+    }
+
+    $certName = "star.$dnsConfiguration.eshopworld.$dnsSuffix"
+
+    $kvName = "esw-$rgCode-kv-$environment"
+
+    $certSecretName = "esw-star-$environment-certificate"
+
+    $certPwd = (Get-AzureKeyVaultSecret -VaultName $kvName -Name "$certSecretName-pwd").SecretValue
+
+    $certBase64Encoded = (Get-AzureKeyVaultSecret -VaultName $kvName -Name $certSecretName).SecretValueText
+
+    $certFilePath = ".\$certName.pfx"
+
+    [IO.File]::WriteAllBytes($certFilePath, [Convert]::FromBase64String($certBase64Encoded))
+
+    Add-AzureRmApplicationGatewaySslCertificate -ApplicationGateway $agRefresh -Name $certName -CertificateFile $certFilePath -Password $certPwd > $null
+
+    Set-AzureRmApplicationGateway -ApplicationGateway $agRefresh > $null
 }

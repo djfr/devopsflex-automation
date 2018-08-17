@@ -62,6 +62,8 @@ Export-ModuleMember -Function @(
 
     # AzureAppGatewayHelpers
     'New-EswApplicationGatewayConfig'
+	'New-EswApplicationGateway'
+	'Add-EswApplicationGatewayCertificate'
 
     # AzureDnsHelpers
     'New-EswDnsEndpoint'
