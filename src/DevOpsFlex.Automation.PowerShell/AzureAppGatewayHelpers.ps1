@@ -231,7 +231,7 @@ This function assumes you are connected to ARM (Login-AzAccount) and that you ar
 
     $gipconfig = New-AzureRmApplicationGatewayIPConfiguration -Name appGatewayFrontendIP -Subnet $agSubnet
     $fipconfig = New-AzureRmApplicationGatewayFrontendIPConfig -Name appGatewayFrontendIPConfig -PublicIPAddress $pip
-    $frontendport = New-AzureRmApplicationGatewayFrontendPort -Name myFrontendPort -Port 80 > $null
+    $frontendport = New-AzureRmApplicationGatewayFrontendPort -Name myFrontendPort -Port 80
 
     $backendPool = New-AzureRmApplicationGatewayBackendAddressPool -Name $lastAg.BackendAddressPools[0].Name -BackendIPAddresses `
                                                                             $lastAg.BackendAddressPools[0].BackendAddresses[0].IpAddress
