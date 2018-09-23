@@ -85,20 +85,23 @@ Creates and configures traffic manager profiles.
                                                     -MonitorPath $ProbePath `
                                                     -MonitorIntervalInSeconds 10 `
                                                     -MonitorTimeoutInSeconds 9 `
-                                                    -MonitorToleratedNumberOfFailures 2
+                                                    -MonitorToleratedNumberOfFailures 2  `
+                                                    -ProfileStatus Enabled                                                  
     }
 
     foreach($endpoint in $dnsEndpoints) {
         $tmEndpoints = $profile.Endpoints | ? { $_.Name -eq "$($endpoint.Region)-endpoint" }
 
-        if($tmEndpoints.Count -eq 0) {
-            $profile | Add-AzureRmTrafficManagerEndpointConfig -EndpointName "$($endpoint.Region)-endpoint" `
-                                                                -Type ExternalEndpoints `
-                                                                -Target $endpoint.Uri `
-                                                                -EndpointLocation $endpoint.GetRegionName() `
-                                                                -EndpointStatus Enabled > $null
+        $endpointName = "$($endpoint.Region)-endpoint"
+
+        if(!($tmEndpoints | ? { $_.Name -eq $endpointName })) {
+            New-AzureRmTrafficManagerEndpoint -Name $endpointName `
+                                                    -ProfileName $profile.Name `
+                                                    -ResourceGroupName $profile.ResourceGroupName `
+                                                    -Type ExternalEndpoints `
+                                                    -Target $endpoint.Uri `
+                                                    -EndpointLocation $endpoint.GetRegionName() `
+                                                    -EndpointStatus Enabled > $null
         }
     }
-
-    $profile | Set-AzureRmTrafficManagerProfile > $null
 }
