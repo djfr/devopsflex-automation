@@ -214,7 +214,7 @@ function New-UserInKeyVault
     Will generate a password for the user 'ausername' for a VM and store it in a named pair in keyvault 'mykeyvault' named 'myuser'.
 
 .FUNCTIONALITY
-    Creates users stored in KeyVault for both DevOps automation code for VMs and Service Fabric
+    Creates users stored in KeyVault for DevOps automation code for VMs, Service Fabric, SQL
 #>
 
     [CmdletBinding()]
@@ -230,7 +230,7 @@ function New-UserInKeyVault
         [string] $Username,
 
         [parameter(Mandatory=$true, Position=4)]
-        [validateset("VM", "Fabric")]
+        [validateset("VM", "Fabric", "SQL")]
         [string] $Type,
 
         [int] $MinPasswordLength = 15,
