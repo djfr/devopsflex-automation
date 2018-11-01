@@ -237,7 +237,7 @@ function New-UserInKeyVault
         [int] $MaxPasswordLength = 20
     )
 
-    $password = New-SWRandomPassword -MinPasswordLength 15 -MaxPasswordLength 25 -InputStrings @('abcdefghijklmnopqrstuvwxyz', 'ABCEFGHIJKLMNOPQRSTUVWXYZ', '0123456789', '#&%!')
+    $password = New-SWRandomPassword -MinPasswordLength $MinPasswordLength -MaxPasswordLength $MaxPasswordLength -InputStrings @('abcdefghijklmnopqrstuvwxyz', 'ABCEFGHIJKLMNOPQRSTUVWXYZ', '0123456789', '#&%!')
     $tags = @{
                  ComponentName=$Name
                  Type='Username'
