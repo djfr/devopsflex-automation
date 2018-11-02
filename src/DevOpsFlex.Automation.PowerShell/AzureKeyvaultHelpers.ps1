@@ -229,34 +229,32 @@ function New-UserInKeyVault
         [parameter(Mandatory=$true, Position=3)]
         [string] $Username,
 
-        [parameter(Mandatory=$true, Position=4)]
-        [validateset("VM", "Fabric", "SQL")]
+        [parameter(Mandatory=$false)]
+        [validateset("VM", "Fabric", "SQL", "DB")]
         [string] $Type,
 
         [int] $MinPasswordLength = 15,
         [int] $MaxPasswordLength = 20
     )
 
-    $password = New-SWRandomPassword -MinPasswordLength 15 -MaxPasswordLength 25 -InputStrings @('abcdefghijklmnopqrstuvwxyz', 'ABCEFGHIJKLMNOPQRSTUVWXYZ', '0123456789', '#&%!')
+    $password = New-SWRandomPassword -MinPasswordLength $MinPasswordLength -MaxPasswordLength $MaxPasswordLength -InputStrings @('abcdefghijklmnopqrstuvwxyz', 'ABCEFGHIJKLMNOPQRSTUVWXYZ', '0123456789', '#&%!')
+    $tags = @{
+                 ComponentName=$Name
+                 Type='Username'
+             }
+
+    if($Type) { $tags += @{ ComponentType=$Type } }
 
     Set-AzureKeyVaultSecret -VaultName $KeyVaultName `
                             -Name "$Name-$Type-user".ToLower() `
                             -SecretValue (ConvertTo-SecureString $Username -AsPlainText -Force) `
-                            -Tags @{
-                                ComponentName=$Name
-                                ComponentType=$Type
-                                Type='Username'
-                            } `
+                            -Tags $tags `
                             -Verbose > $null
 
     Set-AzureKeyVaultSecret -VaultName $KeyVaultName `
                             -Name "$Name-$Type-pwd".ToLower() `
                             -SecretValue (ConvertTo-SecureString $password -AsPlainText -Force) `
-                            -Tags @{
-                                ComponentName=$Name
-                                ComponentType=$Type
-                                Type='Password'
-                            } `
+                            -Tags $tags `
                             -Verbose > $null
 
     Write-Information "Generated password for the account $Username : $password"
