@@ -10,6 +10,9 @@ Scans service bus namespaces for authorization rules and sets the keyvault secre
 .PARAMETER KeyVaultName 
 Specifies the key vault to set the secrets in.
 
+.PARAMETER ResourceGroup
+Specifies the target resource group
+
 .PARAMETER Environment
 Specifies the environment to limit the service bus namespace on.
 
@@ -17,7 +20,7 @@ Specifies the environment to limit the service bus namespace on.
 Specifies the regex to limit the service bus namespace on.
 
 .EXAMPLE
-Register-AzureServiceBus -KeyVaultName "test-vault" -Environment "uat" -Regex "(esw)"
+Register-AzureServiceBus -KeyVaultName "test-vault" -ResourceGroup "testRG" -Environment "uat" -Regex "(esw)"
 This command sets secrets in the test-vault for all environments ending in uat and containing esw in their namespace.
 
 .NOTES
@@ -28,7 +31,7 @@ Currently CmdletBinding doesn't have any internal support built-in.
         [parameter(Mandatory=$true)]
         [string] $KeyVaultName,
 
-        [parameter(Mandatory=$true)]
+        [parameter(Mandatory=$false)]
         [string] $ResourceGroup,
 
         [parameter(Mandatory=$false)]
@@ -38,8 +41,14 @@ Currently CmdletBinding doesn't have any internal support built-in.
         [string] $Regex
     )
 
-    $rules = Get-AzureRmServiceBusNamespace -ResourceGroupName $ResourceGroup | % { Get-AzureRmServiceBusAuthorizationRule -Namespace $_.Name -ResourceGroupName $ResourceGroup } | ? { $_.Name -eq 'RootManageSharedAccessKey' } 
+    if(!$ResourceGroup) {
+        $rules = Get-AzureRmServiceBusNamespace | % { Get-AzureRmServiceBusAuthorizationRule -Namespace $_.Name -ResourceGroupName $_.ResourceGroup } | ? { $_.Name -eq 'RootManageSharedAccessKey' } 
 
+    }
+    else {
+        $rules = Get-AzureRmResourceGroup -Name $ResourceGroup | Get-AzureRmServiceBusNamespace | % { Get-AzureRmServiceBusAuthorizationRule -Namespace $_.Name -ResourceGroupName $_.ResourceGroup } | ? { $_.Name -eq 'RootManageSharedAccessKey' } 
+    }
+    
     $rules | % { 
         if(($Environment -eq $null) -or ($_.Namespace -match "-$Environment`$")) {
             if(($Regex -eq $null) -or ($_.Namespace -match "$Regex")) {
