@@ -267,5 +267,3 @@ Currently CmdletBinding doesn't have any internal support built-in.
         }
     }
 }
-
-Register-AzureServiceBusInKeyVault
