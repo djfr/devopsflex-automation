@@ -28,6 +28,9 @@ Currently CmdletBinding doesn't have any internal support built-in.
         [parameter(Mandatory=$true)]
         [string] $KeyVaultName,
 
+        [parameter(Mandatory=$true)]
+        [string] $ResourceGroup,
+
         [parameter(Mandatory=$false)]
         [string] $Environment,
 
@@ -35,7 +38,7 @@ Currently CmdletBinding doesn't have any internal support built-in.
         [string] $Regex
     )
 
-    $rules = Get-AzureSBNamespace | % { Get-AzureSBAuthorizationRule -Namespace $_.Name } | ? { $_.Name -eq 'RootManageSharedAccessKey' } 
+    $rules = Get-AzureRmServiceBusNamespace -ResourceGroupName $ResourceGroup | % { Get-AzureRmServiceBusAuthorizationRule -Namespace $_.Name -ResourceGroupName $ResourceGroup } | ? { $_.Name -eq 'RootManageSharedAccessKey' } 
 
     $rules | % { 
         if(($Environment -eq $null) -or ($_.Namespace -match "-$Environment`$")) {
@@ -44,7 +47,7 @@ Currently CmdletBinding doesn't have any internal support built-in.
 
                 Write-Output "Pushing $($keyName) to $($KeyVaultName)"
 
-                $null = Set-AzureKeyVaultSecret -VaultName $KeyVaultName -Name $keyName -SecretValue (ConvertTo-SecureString -String $_.ConnectionString -AsPlainText –Force)
+                $null = Set-AzureKeyVaultSecret -VaultName $KeyVaultName -Name $keyName -SecretValue (ConvertTo-SecureString -String $_.ConnectionString -AsPlainText -Force)
             }
         }
     }
@@ -133,7 +136,7 @@ Currently CmdletBinding doesn't have any internal support built-in.
 
                 Write-Output "Pushing SQLConnectionString to $($KeyVaultName)"
 
-                $null = Set-AzureKeyVaultSecret -VaultName $KeyVaultName -Name 'SQLConnectionString' -SecretValue (ConvertTo-SecureString -String $connectionString -AsPlainText –Force)
+                $null = Set-AzureKeyVaultSecret -VaultName $KeyVaultName -Name 'SQLConnectionString' -SecretValue (ConvertTo-SecureString -String $connectionString -AsPlainText ï¿½Force)
             }
         }
     } 
@@ -194,7 +197,7 @@ Currently CmdletBinding doesn't have any internal support built-in.
 
                 Write-Output "Pushing $($keyName) to $($KeyVaultName)"
                 
-                $null = Set-AzureKeyVaultSecret -VaultName $KeyVaultName -Name $keyName -SecretValue (ConvertTo-SecureString -String $keys.primaryMasterKey -AsPlainText –Force)         
+                $null = Set-AzureKeyVaultSecret -VaultName $KeyVaultName -Name $keyName -SecretValue (ConvertTo-SecureString -String $keys.primaryMasterKey -AsPlainText ï¿½Force)         
             }
         }
     }
@@ -259,8 +262,10 @@ Currently CmdletBinding doesn't have any internal support built-in.
 
                 Write-Output "Pushing $($keyName) to $($KeyVaultName)"
 
-                $null = Set-AzureKeyVaultSecret -VaultName $KeyVaultName -Name $keyName -SecretValue (ConvertTo-SecureString -String $primaryKey -AsPlainText –Force)         
+                $null = Set-AzureKeyVaultSecret -VaultName $KeyVaultName -Name $keyName -SecretValue (ConvertTo-SecureString -String $primaryKey -AsPlainText ï¿½Force)         
             }
         }
     }
 }
+
+Register-AzureServiceBusInKeyVault
