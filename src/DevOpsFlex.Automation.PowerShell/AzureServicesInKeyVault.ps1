@@ -10,6 +10,9 @@ Scans service bus namespaces for authorization rules and sets the keyvault secre
 .PARAMETER KeyVaultName 
 Specifies the key vault to set the secrets in.
 
+.PARAMETER ResourceGroup
+Specifies the target resource group
+
 .PARAMETER Environment
 Specifies the environment to limit the service bus namespace on.
 
@@ -17,7 +20,7 @@ Specifies the environment to limit the service bus namespace on.
 Specifies the regex to limit the service bus namespace on.
 
 .EXAMPLE
-Register-AzureServiceBus -KeyVaultName "test-vault" -Environment "uat" -Regex "(esw)"
+Register-AzureServiceBus -KeyVaultName "test-vault" -ResourceGroup "testRG" -Environment "uat" -Regex "(esw)"
 This command sets secrets in the test-vault for all environments ending in uat and containing esw in their namespace.
 
 .NOTES
@@ -29,14 +32,23 @@ Currently CmdletBinding doesn't have any internal support built-in.
         [string] $KeyVaultName,
 
         [parameter(Mandatory=$false)]
+        [string] $ResourceGroup,
+
+        [parameter(Mandatory=$false)]
         [string] $Environment,
 
         [parameter(Mandatory=$false)]
         [string] $Regex
     )
 
-    $rules = Get-AzureSBNamespace | % { Get-AzureSBAuthorizationRule -Namespace $_.Name } | ? { $_.Name -eq 'RootManageSharedAccessKey' } 
+    if(!$ResourceGroup) {
+        $rules = Get-AzureRmServiceBusNamespace | % { Get-AzureRmServiceBusAuthorizationRule -Namespace $_.Name -ResourceGroupName $_.ResourceGroup } | ? { $_.Name -eq 'RootManageSharedAccessKey' } 
 
+    }
+    else {
+        $rules = Get-AzureRmResourceGroup -Name $ResourceGroup | Get-AzureRmServiceBusNamespace | % { Get-AzureRmServiceBusAuthorizationRule -Namespace $_.Name -ResourceGroupName $_.ResourceGroup } | ? { $_.Name -eq 'RootManageSharedAccessKey' } 
+    }
+    
     $rules | % { 
         if(($Environment -eq $null) -or ($_.Namespace -match "-$Environment`$")) {
             if(($Regex -eq $null) -or ($_.Namespace -match "$Regex")) {
@@ -44,7 +56,7 @@ Currently CmdletBinding doesn't have any internal support built-in.
 
                 Write-Output "Pushing $($keyName) to $($KeyVaultName)"
 
-                $null = Set-AzureKeyVaultSecret -VaultName $KeyVaultName -Name $keyName -SecretValue (ConvertTo-SecureString -String $_.ConnectionString -AsPlainText –Force)
+                $null = Set-AzureKeyVaultSecret -VaultName $KeyVaultName -Name $keyName -SecretValue (ConvertTo-SecureString -String $_.ConnectionString -AsPlainText -Force)
             }
         }
     }
@@ -133,7 +145,7 @@ Currently CmdletBinding doesn't have any internal support built-in.
 
                 Write-Output "Pushing SQLConnectionString to $($KeyVaultName)"
 
-                $null = Set-AzureKeyVaultSecret -VaultName $KeyVaultName -Name 'SQLConnectionString' -SecretValue (ConvertTo-SecureString -String $connectionString -AsPlainText –Force)
+                $null = Set-AzureKeyVaultSecret -VaultName $KeyVaultName -Name 'SQLConnectionString' -SecretValue (ConvertTo-SecureString -String $connectionString -AsPlainText -Force)
             }
         }
     } 
@@ -194,7 +206,7 @@ Currently CmdletBinding doesn't have any internal support built-in.
 
                 Write-Output "Pushing $($keyName) to $($KeyVaultName)"
                 
-                $null = Set-AzureKeyVaultSecret -VaultName $KeyVaultName -Name $keyName -SecretValue (ConvertTo-SecureString -String $keys.primaryMasterKey -AsPlainText –Force)         
+                $null = Set-AzureKeyVaultSecret -VaultName $KeyVaultName -Name $keyName -SecretValue (ConvertTo-SecureString -String $keys.primaryMasterKey -AsPlainText -Force)         
             }
         }
     }
@@ -259,7 +271,7 @@ Currently CmdletBinding doesn't have any internal support built-in.
 
                 Write-Output "Pushing $($keyName) to $($KeyVaultName)"
 
-                $null = Set-AzureKeyVaultSecret -VaultName $KeyVaultName -Name $keyName -SecretValue (ConvertTo-SecureString -String $primaryKey -AsPlainText –Force)         
+                $null = Set-AzureKeyVaultSecret -VaultName $KeyVaultName -Name $keyName -SecretValue (ConvertTo-SecureString -String $primaryKey -AsPlainText -Force)         
             }
         }
     }
