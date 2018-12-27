@@ -316,3 +316,20 @@ Maps the contents of the 'my-kv' keyvault to the file 'C:\MyFolder\myfile.azurea
 
     Set-Content -Value ($authPayload | ConvertTo-Json) -Path (Join-Path $FileLocation $FileName) > $null
 }
+
+function Copy-AzFlexKeyVault
+{
+    [CmdletBinding()]
+    param
+    (
+        [parameter(Mandatory=$true, Position=0)]
+        [string] $SourceKeyvaultName,
+
+        [parameter(Mandatory=$true, Position=1)]
+        [string] $DestinationKeyvaultName
+    )
+
+    Get-AzKeyVaultSecret -VaultName $SourceKeyvaultName | % {
+        Set-AzKeyVaultSecret -VaultName $DestinationKeyvaultName -Name $($_.Name) -SecretValue $(Get-AzKeyVaultSecret -VaultName $SourceKeyvaultName -Name $($_.Name)).SecretValue
+    }
+}
