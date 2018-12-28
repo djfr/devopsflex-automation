@@ -326,10 +326,37 @@ function Copy-AzFlexKeyVault
         [string] $SourceKeyvaultName,
 
         [parameter(Mandatory=$true, Position=1)]
-        [string] $DestinationKeyvaultName
+        [string] $SourceResourceGroup,
+
+        [parameter(Mandatory=$true, Position=2)]
+        [string] $DestinationKeyvaultName,
+
+        [parameter(Mandatory=$true, Position=3)]
+        [string] $DestinationResourceGroup
     )
 
+    $sourceKv = Get-AzKeyVault -ResourceGroupName $SourceResourceGroup -VaultName $SourceKeyvaultName
+    if(-not $sourceKv) {
+        throw "Couldn't find KeyVault $SourceKeyvaultName under resource group $SourceResourceGroup"
+    }
+
+    $destinationKv = Get-AzKeyVault -ResourceGroupName $DestinationResourceGroup -VaultName $DestinationKeyvaultName
+    if(-not $destinationKv) {
+        throw "Couldn't find KeyVault $DestinationKeyvaultName under resource group $DestinationResourceGroup"
+    }
+
     Get-AzKeyVaultSecret -VaultName $SourceKeyvaultName | % {
-        Set-AzKeyVaultSecret -VaultName $DestinationKeyvaultName -Name $($_.Name) -SecretValue $(Get-AzKeyVaultSecret -VaultName $SourceKeyvaultName -Name $($_.Name)).SecretValue
+        Set-AzKeyVaultSecret -VaultName $DestinationKeyvaultName `
+                             -Name $($_.Name) `
+                             -SecretValue $(Get-AzKeyVaultSecret -VaultName $SourceKeyvaultName -Name $($_.Name)).SecretValue
+    }
+
+    (Get-AzKeyVault -ResourceGroupName $SourceResourceGroup -VaultName $SourceKeyvaultName).AccessPolicies | % {
+        Set-AzKeyVaultAccessPolicy -ResourceGroupName $DestinationResourceGroup `
+                                   -VaultName $DestinationKeyvaultName `
+                                   -ObjectId $_.ObjectId `
+                                   -PermissionsToKeys $_.PermissionsToKeys `
+                                   -PermissionsToSecrets $_.PermissionsToSecrets `
+                                   -PermissionsToCertificates $_.PermissionsToCertificates
     }
 }
