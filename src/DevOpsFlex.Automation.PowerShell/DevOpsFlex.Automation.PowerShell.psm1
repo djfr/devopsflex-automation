@@ -30,6 +30,7 @@ Export-ModuleMember -Function @(
     'Get-AadAuthFile'
     'New-SWRandomPassword'
     'New-UserInKeyVault'
+    'Copy-AzFlexKeyVault'
 
     # AzurePrincipalWithCert
     'New-AzurePrincipalWithCert'

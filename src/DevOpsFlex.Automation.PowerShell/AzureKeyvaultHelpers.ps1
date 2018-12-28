@@ -316,3 +316,74 @@ Maps the contents of the 'my-kv' keyvault to the file 'C:\MyFolder\myfile.azurea
 
     Set-Content -Value ($authPayload | ConvertTo-Json) -Path (Join-Path $FileLocation $FileName) > $null
 }
+
+function Copy-AzFlexKeyVault
+{
+<#
+.Synopsis
+Copies Secrets and Access Policies from a source KeyVault onto a Destination KeyVault.
+
+.DESCRIPTION
+Copies Secrets and Access Policies from a source KeyVault onto a Destination KeyVault.
+
+You need to be in the right subscription where both KeyVaults are located. Both source and destination KeyVault need to be on the same subscription.
+You need to be loged in azure with 'Login-AzAccount' and you need to have LIST and READ rights on secrets on the target key vault.
+
+.PARAMETER SourceKeyvaultName
+The name of the source KeyVault.
+
+.PARAMETER SourceResourceGroup
+The name of the source KeyVault Resource Group.
+
+.PARAMETER DestinationKeyvaultName
+The name of the destination KeyVault.
+
+.PARAMETER DestinationResourceGroup
+The name of the destination KeyVault Resource Group.
+
+.EXAMPLE
+Copy-AzFlexKeyVault -SourceKeyvaultName my-source-kv -SourceResourceGroup my-source-kv-rg -DestinationKeyvaultName my-destination-kv -DestinationResourceGroup my-destination-kv-rg
+Copies Secrets and Access Policies from the KeyVault my-source-kv in Resource Group my-source-kv-rg to the KeyVault my-destination-kv in Resource Group my-destination-kv-rg.
+#>
+
+    [CmdletBinding()]
+    param
+    (
+        [parameter(Mandatory=$true, Position=0)]
+        [string] $SourceKeyvaultName,
+
+        [parameter(Mandatory=$true, Position=1)]
+        [string] $SourceResourceGroup,
+
+        [parameter(Mandatory=$true, Position=2)]
+        [string] $DestinationKeyvaultName,
+
+        [parameter(Mandatory=$true, Position=3)]
+        [string] $DestinationResourceGroup
+    )
+
+    $sourceKv = Get-AzKeyVault -ResourceGroupName $SourceResourceGroup -VaultName $SourceKeyvaultName
+    if(-not $sourceKv) {
+        throw "Couldn't find KeyVault $SourceKeyvaultName under resource group $SourceResourceGroup"
+    }
+
+    $destinationKv = Get-AzKeyVault -ResourceGroupName $DestinationResourceGroup -VaultName $DestinationKeyvaultName
+    if(-not $destinationKv) {
+        throw "Couldn't find KeyVault $DestinationKeyvaultName under resource group $DestinationResourceGroup"
+    }
+
+    Get-AzKeyVaultSecret -VaultName $SourceKeyvaultName | % {
+        Set-AzKeyVaultSecret -VaultName $DestinationKeyvaultName `
+                             -Name $($_.Name) `
+                             -SecretValue $(Get-AzKeyVaultSecret -VaultName $SourceKeyvaultName -Name $($_.Name)).SecretValue
+    }
+
+    (Get-AzKeyVault -ResourceGroupName $SourceResourceGroup -VaultName $SourceKeyvaultName).AccessPolicies | % {
+        Set-AzKeyVaultAccessPolicy -ResourceGroupName $DestinationResourceGroup `
+                                   -VaultName $DestinationKeyvaultName `
+                                   -ObjectId $_.ObjectId `
+                                   -PermissionsToKeys $_.PermissionsToKeys `
+                                   -PermissionsToSecrets $_.PermissionsToSecrets `
+                                   -PermissionsToCertificates $_.PermissionsToCertificates
+    }
+}
