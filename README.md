@@ -5,6 +5,10 @@ PowerShell module to automate certain tasks that are used to complement ARM temp
 
 ## Functions in this module
 
+#### [Add-UserAssignedIdentityToVmss](docs/Add-UserAssignedIdentityToVmss.md)
+
+Assigns a user-assigned managed identity to VM scale sets.
+
 #### [New-AzurePrincipalWithCert](docs/New-AzurePrincipalWithCert.md)
 
 Creates an Azure Service Principal that uses an x509 certificate to authenticate against the Azure AD.
