@@ -1,27 +1,23 @@
 ---
-external help file: DevOpsFlex.Automation.PowerShell-Help.xml
+external help file: DevOpsFlex.Automation.PowerShell-help.xml
 Module Name: DevOpsFlex.Automation.PowerShell
 online version:
 schema: 2.0.0
 ---
 
-# New-AutoRestProject
+# New-WebSlot
 
 ## SYNOPSIS
-generates, builds and packs c# client side code for given JSON Swagger URL
+{{Fill in the Synopsis}}
 
 ## SYNTAX
 
 ```
-New-AutoRestProject [-DefUrl] <String> [-Namespace] <String> [[-OutputFolder] <String>] [<CommonParameters>]
+New-WebSlot [-Name] <String> [-Force] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-generate, build and pack nuget package for given JSON Swagger input
-
-Currently supports:
-
-* win10-x64
+{{Fill in the Description}}
 
 ## EXAMPLES
 
@@ -34,46 +30,31 @@ PS C:\> {{ Add example code here }}
 
 ## PARAMETERS
 
-### -DefUrl
-URL for the Swagger definition JSON file
+### -Force
+{{Fill Force Description}}
 
 ```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: True
-Position: 1
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Namespace
-Namespace to put generated code into
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: True
-Position: 2
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -OutputFolder
-Output folder
-
-```yaml
-Type: String
+Type: SwitchParameter
 Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 3
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Name
+{{Fill Name Description}}
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 0
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -85,8 +66,11 @@ For more information, see about_CommonParameters (http://go.microsoft.com/fwlink
 
 ## INPUTS
 
+### None
+
 ## OUTPUTS
 
+### System.Object
 ## NOTES
 
 ## RELATED LINKS

@@ -5,34 +5,50 @@ online version:
 schema: 2.0.0
 ---
 
-# New-UserInKeyVault
+# New-EswTrafficManagerProfile
 
 ## SYNOPSIS
-Generates a strong password for a Username and stores both the Username and Password in the specified KeyVault.
+Create a traffic manager profile and configure it's endpoints.
 
 ## SYNTAX
 
 ```
-New-UserInKeyVault [-KeyvaultName] <String> [-Name] <String> [-Username] <String> [-Type <String>]
- [-MinPasswordLength <Int32>] [-MaxPasswordLength <Int32>] [<CommonParameters>]
+New-EswTrafficManagerProfile [-Name] <String> [-ResourceGroupName] <String> [-DnsPrefix] <String>
+ [-DnsEndpoints] <PSObject[]> [-Port <Int32>] [-ProbePath <String>] [-Force] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-Generates a strong password for a Username and stores both the Username and Password in the specified KeyVault.
+Create a traffic manager profile and configure it's endpoints.
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-New-UserInKeyVault -KeyvaultName 'mykeyvault' -Name 'myuser' -Username 'ausername' -Type 'VM'
+New-EswTrafficManagerProfile -Name 'test-profile' -ResourceGroupName 'test-rg' -DnsPrefix 'test-devops-api' -DnsEndpoints $dnsEndpoints -Port '555'
 ```
 
-Will generate a password for the user 'ausername' for a VM and store it in a named pair in keyvault 'mykeyvault' named 'myuser'.
+Will create a test-profile with the test-devops-api prefix using the dns endpoints passed in on port 555.
+See the DNSEndpoint class in the FabricEndpoints.ps1 script.
 
 ## PARAMETERS
 
-### -KeyvaultName
-{{Fill KeyvaultName Description}}
+### -Name
+The name of the traffic manager profile to create.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ResourceGroupName
+The Azure resource group name that the load balancer is in.
 
 ```yaml
 Type: String
@@ -46,8 +62,8 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Name
-{{Fill Name Description}}
+### -DnsPrefix
+The prefix for the DNS to create.
 
 ```yaml
 Type: String
@@ -61,11 +77,11 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Username
-{{Fill Username Description}}
+### -DnsEndpoints
+Array of the DnsEndpoint class that contains the Uri and Region for each endpoint.
 
 ```yaml
-Type: String
+Type: PSObject[]
 Parameter Sets: (All)
 Aliases:
 
@@ -76,8 +92,24 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Type
-{{Fill Type Description}}
+### -Port
+The port to use.
+
+```yaml
+Type: Int32
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: 0
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ProbePath
+The path of the probe you wish to create.
+The default is '/Probe'.
 
 ```yaml
 Type: String
@@ -86,37 +118,22 @@ Aliases:
 
 Required: False
 Position: Named
-Default value: None
+Default value: /Probe
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -MinPasswordLength
-{{Fill MinPasswordLength Description}}
+### -Force
+Force the re-creation of the traffic manager profile.
 
 ```yaml
-Type: Int32
+Type: SwitchParameter
 Parameter Sets: (All)
 Aliases:
 
 Required: False
 Position: Named
-Default value: 15
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -MaxPasswordLength
-{{Fill MaxPasswordLength Description}}
-
-```yaml
-Type: Int32
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: 20
+Default value: False
 Accept pipeline input: False
 Accept wildcard characters: False
 ```

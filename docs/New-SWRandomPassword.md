@@ -170,7 +170,6 @@ For more information, see about_CommonParameters (http://go.microsoft.com/fwlink
 ## OUTPUTS
 
 ### [String]
-
 ## NOTES
 Written by Simon Wåhlin, blog.simonw.se
 http://blog.simonw.se/powershell-generating-random-password-for-active-directory/
