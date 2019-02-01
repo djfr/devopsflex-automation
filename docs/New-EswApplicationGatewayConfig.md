@@ -5,34 +5,35 @@ online version:
 schema: 2.0.0
 ---
 
-# New-UserInKeyVault
+# New-EswApplicationGatewayConfig
 
 ## SYNOPSIS
-Generates a strong password for a Username and stores both the Username and Password in the specified KeyVault.
+{{Fill in the Synopsis}}
 
 ## SYNTAX
 
 ```
-New-UserInKeyVault [-KeyvaultName] <String> [-Name] <String> [-Username] <String> [-Type <String>]
- [-MinPasswordLength <Int32>] [-MaxPasswordLength <Int32>] [<CommonParameters>]
+New-EswApplicationGatewayConfig [-AppGatewayName] <String> [-ResourceGroupName] <String> [-Name] <String>
+ [-Port] <String> [-DnsName] <String> [-DnsSuffix] <String> [-ProbePath <String>] [-IsMultiRegion] [-Force]
+ [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-Generates a strong password for a Username and stores both the Username and Password in the specified KeyVault.
+{{Fill in the Description}}
 
 ## EXAMPLES
 
-### EXAMPLE 1
-```
-New-UserInKeyVault -KeyvaultName 'mykeyvault' -Name 'myuser' -Username 'ausername' -Type 'VM'
+### Example 1
+```powershell
+PS C:\> {{ Add example code here }}
 ```
 
-Will generate a password for the user 'ausername' for a VM and store it in a named pair in keyvault 'mykeyvault' named 'myuser'.
+{{ Add example description here }}
 
 ## PARAMETERS
 
-### -KeyvaultName
-{{Fill KeyvaultName Description}}
+### -AppGatewayName
+{{Fill AppGatewayName Description}}
 
 ```yaml
 Type: String
@@ -40,7 +41,67 @@ Parameter Sets: (All)
 Aliases:
 
 Required: True
-Position: 2
+Position: 0
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -DnsName
+{{Fill DnsName Description}}
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 4
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -DnsSuffix
+{{Fill DnsSuffix Description}}
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 5
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Force
+{{Fill Force Description}}
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -IsMultiRegion
+{{Fill IsMultiRegion Description}}
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -55,14 +116,14 @@ Parameter Sets: (All)
 Aliases:
 
 Required: True
-Position: 3
+Position: 2
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Username
-{{Fill Username Description}}
+### -Port
+{{Fill Port Description}}
 
 ```yaml
 Type: String
@@ -70,14 +131,14 @@ Parameter Sets: (All)
 Aliases:
 
 Required: True
-Position: 4
+Position: 3
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Type
-{{Fill Type Description}}
+### -ProbePath
+{{Fill ProbePath Description}}
 
 ```yaml
 Type: String
@@ -91,32 +152,17 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -MinPasswordLength
-{{Fill MinPasswordLength Description}}
+### -ResourceGroupName
+{{Fill ResourceGroupName Description}}
 
 ```yaml
-Type: Int32
+Type: String
 Parameter Sets: (All)
 Aliases:
 
-Required: False
-Position: Named
-Default value: 15
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -MaxPasswordLength
-{{Fill MaxPasswordLength Description}}
-
-```yaml
-Type: Int32
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: 20
+Required: True
+Position: 1
+Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
@@ -127,8 +173,11 @@ For more information, see about_CommonParameters (http://go.microsoft.com/fwlink
 
 ## INPUTS
 
+### None
+
 ## OUTPUTS
 
+### System.Object
 ## NOTES
 
 ## RELATED LINKS

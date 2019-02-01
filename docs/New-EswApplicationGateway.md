@@ -5,48 +5,33 @@ online version:
 schema: 2.0.0
 ---
 
-# Add-UserToKeyVault
+# New-EswApplicationGateway
 
 ## SYNOPSIS
-{{Fill in the Synopsis}}
+Provisions a new Application Gateway for the eShopworld evolution platform.
 
 ## SYNTAX
 
 ```
-Add-UserToKeyVault [-KeyvaultName] <String> [-Username] <String> [<CommonParameters>]
+New-EswApplicationGateway [-ResourceGroupName] <String> [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-{{Fill in the Description}}
+Provisions a new Application Gateway for the eShopworld evolution platform.
 
 ## EXAMPLES
 
-### Example 1
-```powershell
-PS C:\> {{ Add example code here }}
+### EXAMPLE 1
+```
+Provisions a new Application Gateway to the 'eus-platform-test' resource group, the new gateway's details and configuration will be defined by the last gateway provisioned to that resource group.
 ```
 
-{{ Add example description here }}
+New-EswApplicationGateway -ResourceGroupName 'eus-platform-test'
 
 ## PARAMETERS
 
-### -KeyvaultName
-{{Fill KeyvaultName Description}}
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: True
-Position: 0
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Username
-{{Fill Username Description}}
+### -ResourceGroupName
+The name of the azure resource group that the application gateway will be provisioned to.
 
 ```yaml
 Type: String
@@ -66,12 +51,9 @@ For more information, see about_CommonParameters (http://go.microsoft.com/fwlink
 
 ## INPUTS
 
-### None
-
 ## OUTPUTS
 
-### System.String
-
 ## NOTES
+This function assumes you are connected to ARM (Login-AzAccount) and that you are already in the right subscription on ARM.
 
 ## RELATED LINKS

@@ -5,48 +5,34 @@ online version:
 schema: 2.0.0
 ---
 
-# Add-UserToKeyVault
+# Add-EswApplicationGatewayCertificate
 
 ## SYNOPSIS
-{{Fill in the Synopsis}}
+Adds a certificate from Key Vault to an Application Gateway.
 
 ## SYNTAX
 
 ```
-Add-UserToKeyVault [-KeyvaultName] <String> [-Username] <String> [<CommonParameters>]
+Add-EswApplicationGatewayCertificate [-AppGatewayName] <String> [-ResourceGroupName] <String>
+ [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-{{Fill in the Description}}
+Adds a certificate from Key Vault to an Application Gateway.
 
 ## EXAMPLES
 
-### Example 1
-```powershell
-PS C:\> {{ Add example code here }}
+### EXAMPLE 1
+```
+Adds a certificate from the key vault deployed to the 'eus-platform-test' to the application gateway named 'esw-we-fabric-test-ag-01'
 ```
 
-{{ Add example description here }}
+Add-EswApplicationGatewayCertificate -AppGatewayName 'esw-we-fabric-test-ag-01' -ResourceGroupName 'eus-platform-test'
 
 ## PARAMETERS
 
-### -KeyvaultName
-{{Fill KeyvaultName Description}}
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: True
-Position: 0
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Username
-{{Fill Username Description}}
+### -AppGatewayName
+The name of the application gateway that the certificate will be added to.
 
 ```yaml
 Type: String
@@ -60,18 +46,30 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -ResourceGroupName
+The name of the azure resource group that the application gateway is in.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 2
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### CommonParameters
 This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable.
 For more information, see about_CommonParameters (http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## INPUTS
 
-### None
-
 ## OUTPUTS
 
-### System.String
-
 ## NOTES
+This function assumes you are connected to ARM (Login-AzAccount) and that you are already in the right subscription on ARM.
 
 ## RELATED LINKS

@@ -9,6 +9,7 @@
 . "$PSScriptRoot\AzureServicesInKeyVault.ps1"
 . "$PSScriptRoot\AzureVNetHelpers.ps1"
 . "$PSScriptRoot\AzureLoadBalancerHelpers.ps1"
+. "$PSScriptRoot\AzureManagedIdentityHelpers.ps1"
 . "$PSScriptRoot\AzureAppGatewayHelpers.ps1"
 . "$PSScriptRoot\AzureDnsHelpers.ps1"
 . "$PSScriptRoot\AzureTrafficManagerHelpers.ps1"
@@ -60,6 +61,9 @@ Export-ModuleMember -Function @(
 
     # AzureLoadBalancerHelpers
     'New-EswLoadBalancerConfig'
+
+    # AzureManagedIdentityHelpers
+    'Add-UserAssignedIdentityToVmss'
 
     # AzureAppGatewayHelpers
     'New-EswApplicationGatewayConfig'

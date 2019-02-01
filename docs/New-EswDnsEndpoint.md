@@ -5,34 +5,49 @@ online version:
 schema: 2.0.0
 ---
 
-# New-UserInKeyVault
+# New-EswDnsEndpoint
 
 ## SYNOPSIS
-Generates a strong password for a Username and stores both the Username and Password in the specified KeyVault.
+Adds a record to a DNS zone.
 
 ## SYNTAX
 
 ```
-New-UserInKeyVault [-KeyvaultName] <String> [-Name] <String> [-Username] <String> [-Type <String>]
- [-MinPasswordLength <Int32>] [-MaxPasswordLength <Int32>] [<CommonParameters>]
+New-EswDnsEndpoint [-DnsName] <String> [-ResourceGroupName] <String> [-DnsZone] <String> [-IpAddress <String>]
+ [-RecordType <String>] [-CName <String>] [-Force] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-Generates a strong password for a Username and stores both the Username and Password in the specified KeyVault.
+Adds a record to a DNS zone.
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-New-UserInKeyVault -KeyvaultName 'mykeyvault' -Name 'myuser' -Username 'ausername' -Type 'VM'
+New-EswDnsEndPoint -DnsName 'test-record' -ResourceGroupName 'test-rg' -DnsZone 'test.eshopworld.net' -IpAddress '192.168.5.5'
 ```
 
-Will generate a password for the user 'ausername' for a VM and store it in a named pair in keyvault 'mykeyvault' named 'myuser'.
+Will create an A record with an ip address of 192.168.5.5 in the test.eshopworld.net zone.
 
 ## PARAMETERS
 
-### -KeyvaultName
-{{Fill KeyvaultName Description}}
+### -DnsName
+The name of the DNS record being created.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ResourceGroupName
+The Azure resource group name that the load balancer is in.
 
 ```yaml
 Type: String
@@ -46,8 +61,8 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Name
-{{Fill Name Description}}
+### -DnsZone
+The DNS Zone the record will be created in.
 
 ```yaml
 Type: String
@@ -61,23 +76,8 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Username
-{{Fill Username Description}}
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: True
-Position: 4
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Type
-{{Fill Type Description}}
+### -IpAddress
+The IP Address of the A record being created.
 
 ```yaml
 Type: String
@@ -91,32 +91,47 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -MinPasswordLength
-{{Fill MinPasswordLength Description}}
+### -RecordType
+The type of record being created, defaults to an 'A' record.
 
 ```yaml
-Type: Int32
+Type: String
 Parameter Sets: (All)
 Aliases:
 
 Required: False
 Position: Named
-Default value: 15
+Default value: A
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -MaxPasswordLength
-{{Fill MaxPasswordLength Description}}
+### -CName
+If this is CName record being created, this is the url to create it for.
 
 ```yaml
-Type: Int32
+Type: String
 Parameter Sets: (All)
 Aliases:
 
 Required: False
 Position: Named
-Default value: 20
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Force
+Force the recreation of the rule.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
 Accept pipeline input: False
 Accept wildcard characters: False
 ```

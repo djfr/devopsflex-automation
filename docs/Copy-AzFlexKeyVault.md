@@ -5,12 +5,17 @@ online version:
 schema: 2.0.0
 ---
 
-# Disconnect-AzureEswNetworkSecurityGroups
+# Copy-AzFlexKeyVault
 
 ## SYNOPSIS
 Copies Secrets and Access Policies from a source KeyVault onto a Destination KeyVault.
 
 ## SYNTAX
+
+```
+Copy-AzFlexKeyVault [-SourceKeyvaultName] <String> [-SourceResourceGroup] <String>
+ [-DestinationKeyvaultName] <String> [-DestinationResourceGroup] <String> [<CommonParameters>]
+```
 
 ## DESCRIPTION
 Copies Secrets and Access Policies from a source KeyVault onto a Destination KeyVault.
@@ -29,6 +34,66 @@ Copy-AzFlexKeyVault -SourceKeyvaultName my-source-kv -SourceResourceGroup my-sou
 Copies Secrets and Access Policies from the KeyVault my-source-kv in Resource Group my-source-kv-rg to the KeyVault my-destination-kv in Resource Group my-destination-kv-rg.
 
 ## PARAMETERS
+
+### -SourceKeyvaultName
+The name of the source KeyVault.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -SourceResourceGroup
+The name of the source KeyVault Resource Group.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 2
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -DestinationKeyvaultName
+The name of the destination KeyVault.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 3
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -DestinationResourceGroup
+The name of the destination KeyVault Resource Group.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 4
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
 
 ### CommonParameters
 This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable.

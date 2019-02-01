@@ -5,34 +5,49 @@ online version:
 schema: 2.0.0
 ---
 
-# New-UserInKeyVault
+# New-EswLoadBalancerConfig
 
 ## SYNOPSIS
-Generates a strong password for a Username and stores both the Username and Password in the specified KeyVault.
+Adds a probe and rule to an existing internal or external load balancer.
 
 ## SYNTAX
 
 ```
-New-UserInKeyVault [-KeyvaultName] <String> [-Name] <String> [-Username] <String> [-Type <String>]
- [-MinPasswordLength <Int32>] [-MaxPasswordLength <Int32>] [<CommonParameters>]
+New-EswLoadBalancerConfig [-LoadBalancerName] <String> [-ResourceGroupName] <String> [-Name] <String>
+ [-Port] <String> [-ProbePath <String>] [-Force] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-Generates a strong password for a Username and stores both the Username and Password in the specified KeyVault.
+Adds a probe and rule to an existing internal or external load balancer.
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-New-UserInKeyVault -KeyvaultName 'mykeyvault' -Name 'myuser' -Username 'ausername' -Type 'VM'
+New-EswLoadBalancerConfig -LoadBalancerName 'test-lb' -ResourceGroupName 'test-rg' -Name 'test' -Port 999
 ```
 
-Will generate a password for the user 'ausername' for a VM and store it in a named pair in keyvault 'mykeyvault' named 'myuser'.
+Will create a 'test' probe and rule for port '999' on the 'test-lb' load balancer in the 'test-rg' resource group.
 
 ## PARAMETERS
 
-### -KeyvaultName
-{{Fill KeyvaultName Description}}
+### -LoadBalancerName
+The name of the Azure load balancer you wish to configure.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ResourceGroupName
+The Azure resource group name that the load balancer is in.
 
 ```yaml
 Type: String
@@ -47,7 +62,8 @@ Accept wildcard characters: False
 ```
 
 ### -Name
-{{Fill Name Description}}
+The name of the probe/rule you wish to create.
+The convention is that they will both have the same name.
 
 ```yaml
 Type: String
@@ -61,8 +77,8 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Username
-{{Fill Username Description}}
+### -Port
+The port you want to create the rule for.
 
 ```yaml
 Type: String
@@ -76,8 +92,9 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Type
-{{Fill Type Description}}
+### -ProbePath
+The path of the probe you wish to create.
+The default is '/Probe'.
 
 ```yaml
 Type: String
@@ -86,37 +103,22 @@ Aliases:
 
 Required: False
 Position: Named
-Default value: None
+Default value: /Probe
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -MinPasswordLength
-{{Fill MinPasswordLength Description}}
+### -Force
+Force the re-configuration of both the probe and the rule.
 
 ```yaml
-Type: Int32
+Type: SwitchParameter
 Parameter Sets: (All)
 Aliases:
 
 Required: False
 Position: Named
-Default value: 15
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -MaxPasswordLength
-{{Fill MaxPasswordLength Description}}
-
-```yaml
-Type: Int32
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: 20
+Default value: False
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
