@@ -110,3 +110,8 @@ Scans sql database instances based on the search criteria and sets the key vault
 
 #### [New-AutoRestProject](docs/New-AutoRestProject.md)
 
+creates new autorest project for given swagger file
+
+#### [Add-AzScanPrincipalToDomainKeyVaults](docs/Add-AzScanPrincipalToDomainKeyVaults.md)
+
+scans all domain/environment/region permutations as recognized in evolution platform and assigns secret access policy to given identity object id for matching configurtation key vaults
