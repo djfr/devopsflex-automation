@@ -32,6 +32,7 @@ Export-ModuleMember -Function @(
     'New-SWRandomPassword'
     'New-UserInKeyVault'
     'Copy-AzFlexKeyVault'
+    'Add-AzScanPrincipalToDomainKeyVaults'
 
     # AzurePrincipalWithCert
     'New-AzurePrincipalWithCert'

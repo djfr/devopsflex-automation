@@ -271,7 +271,7 @@ Gets the contents of the keyvault and maps it to an Azure auth settings file.
 Gets the contents of the keyvault and maps it to an Azure auth settings file.
 Overrides the current file if it already exists, which is the desired behaviour, since what's on keyvault is the final set of settings.
 
-You need to be loged in azure with 'Login-AzAccount' and you need to have LIST and READ rights on secrets on the target key vault.
+You need to be logged in azure with 'Login-AzAccount' and you need to have LIST and READ rights on secrets on the target key vault.
 
 .PARAMETER KeyvaultName
 The name of the source key vault.
@@ -327,7 +327,7 @@ Copies Secrets and Access Policies from a source KeyVault onto a Destination Key
 Copies Secrets and Access Policies from a source KeyVault onto a Destination KeyVault.
 
 You need to be in the right subscription where both KeyVaults are located. Both source and destination KeyVault need to be on the same subscription.
-You need to be loged in azure with 'Login-AzAccount' and you need to have LIST and READ rights on secrets on the target key vault.
+You need to be logged in azure with 'Login-AzAccount' and you need to have LIST and READ rights on secrets on the target key vault.
 
 .PARAMETER SourceKeyvaultName
 The name of the source KeyVault.
@@ -386,4 +386,65 @@ Copies Secrets and Access Policies from the KeyVault my-source-kv in Resource Gr
                                    -PermissionsToSecrets $_.PermissionsToSecrets `
                                    -PermissionsToCertificates $_.PermissionsToCertificates
     }
+}
+
+function Add-AzScanPrincipalToDomainKeyVaults
+{
+<#
+.Synopsis
+Adds designated identity to all domain key vaults across evolution subscriptions to enable configuration management scanning flow
+
+.DESCRIPTION
+Adds designated identity to all domain key vaults across evolution subscriptions to enable configuration management scanning flow
+
+Domain keyvault are identified by their name following the convention of 'esw-{domain}-{environment}-{region}
+
+The policy configured is for "Get", "List", "Set" secret permissions
+
+You need to be logged in azure with 'Login-AzAccount' and you need to have write permissions onto KeyVault access policies across subscriptions
+
+.PARAMETER IdentityObjectId
+the object id of the identity to set access policies for
+
+.EXAMPLE
+AzScanPrincipalToDomainKeyVaults -IdentityObjectId 93e4953d-6559-4793-b9fd-9bccb97f9198
+ensures re 
+#>
+
+    [CmdletBinding()]
+    param
+    (
+        [parameter(Mandatory=$true, Position=0)]
+        [string] $IdentityObjectId
+    )
+    $envs =  @{SubName="ci"; Token="ci"; Regions="we"}, 
+    @{SubName="test"; Token="test"; Regions="we", "eus"},
+    @{SubName="sandbox"; Token="sand"; Regions="we", "eus"},
+    @{SubName="preprod"; Token="prep"; Regions="we", "eus"},
+    @{SubName="prod"; Token="prod"; Regions="we", "eus"}
+
+	$domains = "tooling", "payments", "logistics", "checkout", "nikesnkrs", "tahoe"
+
+	$envs | ForEach-Object {
+		$env = $_
+		Get-AzSubscription -SubscriptionName "evo-$($env.SubName)" | Select-AzSubscription
+		$domains | ForEach-Object {
+			$domain = $_
+			$env.Regions | ForEach-Object {
+			    $region = $_
+				#check kv present
+                $kv=$null
+                $kvName =  "esw-$domain-$($env.Token)-$region"
+
+				$kv = Get-AzKeyVault -VaultName $kvName
+				if ($kv)
+				{
+					Set-AzKeyVaultAccessPolicy -VaultName $kvName -ObjectId $IdentityObjectId -PermissionsToSecrets "Get","List", "Set"
+				}
+				else {
+					Write-Warning "$kvName does not exist" 
+				}
+			}    
+		}
+	}
 }
